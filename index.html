@@ -1,0 +1,986 @@
+<!DOCTYPE html>
+<html>
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<script src="./support.js"></script>
+</head>
+<body>
+<x-dc>
+<helmet>
+<link rel="preconnect" href="https://fonts.googleapis.com" />
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin="" />
+<link href="https://fonts.googleapis.com/css2?family=Archivo:wght@300;400;500;600;700&family=JetBrains+Mono:wght@300;400;500;700&display=swap" rel="stylesheet" />
+<style>
+  html, body { margin:0; padding:0; background:#08090A; }
+  * { box-sizing:border-box; }
+  a { color:#C9F227; text-decoration:none; }
+  a:hover { color:#E4FF7A; }
+  ::-webkit-scrollbar { width:10px; height:10px; }
+  ::-webkit-scrollbar-thumb { background:#23272A; }
+  ::-webkit-scrollbar-track { background:#0C0E10; }
+  input[type=range] { accent-color:#C9F227; }
+  @keyframes obCell { from { opacity:0; transform:scale(.86); } to { opacity:1; transform:none; } }
+  @keyframes obRise { from { opacity:0; transform:translateY(14px); } to { opacity:1; transform:none; } }
+  @keyframes obSlide { from { opacity:0; transform:translateX(30px); } to { opacity:1; transform:none; } }
+  @keyframes obDraw { from { stroke-dashoffset:1400; } to { stroke-dashoffset:0; } }
+</style>
+</helmet>
+
+<div style="min-height:100vh; background:#08090A; color:#E8EAE6; font-family:'Archivo', system-ui, sans-serif; -webkit-font-smoothing:antialiased;">
+
+<sc-if value="{{ locked }}">
+  <div style="min-height:100vh; display:grid; grid-template-columns:minmax(0,1.15fr) minmax(0,.85fr); align-items:stretch;">
+    <div style="padding:56px 56px 48px; display:flex; flex-direction:column; justify-content:space-between; border-right:1px solid #1C1F21;">
+      <div style="display:flex; align-items:center; gap:14px;">
+        <span style="width:10px; height:10px; background:#C9F227;"></span>
+        <span style="font-family:'JetBrains Mono',monospace; font-size:10px; letter-spacing:.32em; text-transform:uppercase; color:#8C9490;">Quality Assurance · Customer Service</span>
+      </div>
+      <div style="animation:obRise .6s ease both;">
+        <h1 style="margin:0; font-size:96px; font-weight:300; line-height:.88; letter-spacing:-.055em; color:#F4F7F0;">Evaluation<br />Averages</h1>
+        <div style="margin-top:26px; font-size:15px; line-height:1.6; color:#8C9490; max-width:46ch; text-wrap:pretty;">Two doors into the same record. The internal side holds coaching notes, calibration flags and evaluator comparisons. The agent side shows one person their own evaluations, and nobody else's.</div>
+      </div>
+      <div style="font-family:'JetBrains Mono',monospace; font-size:9.5px; letter-spacing:.22em; text-transform:uppercase; color:#4A5254;">{{ stamp }} · Feedback Tracker</div>
+    </div>
+
+    <div style="padding:56px 56px 48px; display:flex; flex-direction:column; justify-content:center; gap:26px; background:#0B0D0F;">
+      <div style="display:flex; gap:2px;">
+        <sc-for list="{{ lockTabs }}" as="t" hint-placeholder-count="2">
+          <button onClick="{{ t.onClick }}" style="flex:1; font-family:'JetBrains Mono',monospace; font-size:10px; letter-spacing:.18em; text-transform:uppercase; cursor:pointer; padding:13px 10px; border-radius:0; border:1px solid {{ t.border }}; background:{{ t.bg }}; color:{{ t.fg }};" style-hover="border-color:#4A5254;">{{ t.label }}</button>
+        </sc-for>
+      </div>
+
+      <div style="font-size:13.5px; line-height:1.6; color:#8C9490; text-wrap:pretty;">{{ lockBlurb }}</div>
+
+      <sc-if value="{{ lockIsClerk }}">
+        <div>
+          <div style="font-family:'JetBrains Mono',monospace; font-size:9.5px; letter-spacing:.24em; text-transform:uppercase; color:#6B736F; margin-bottom:8px;">Your full name</div>
+          <input type="text" placeholder="As it appears in the tracker" value="{{ lockName }}" onInput="{{ onLockName }}" style="font-family:'Archivo',sans-serif; font-size:15px; color:#E8EAE6; background:#0E1113; border:1px solid #23272A; border-radius:0; padding:13px 15px; width:100%; outline:none;" style-focus="border-color:#C9F227;" />
+        </div>
+      </sc-if>
+
+      <div>
+        <div style="font-family:'JetBrains Mono',monospace; font-size:9.5px; letter-spacing:.24em; text-transform:uppercase; color:#6B736F; margin-bottom:8px;">{{ pinLabel }}</div>
+        <input type="password" placeholder="4 digits" value="{{ lockPin }}" onInput="{{ onLockPin }}" onKeyDown="{{ onLockKey }}" style="font-family:'JetBrains Mono',monospace; font-size:19px; letter-spacing:.5em; color:#E8EAE6; background:#0E1113; border:1px solid #23272A; border-radius:0; padding:13px 15px; width:100%; outline:none;" style-focus="border-color:#C9F227;" />
+      </div>
+
+      <sc-if value="{{ lockError }}">
+        <div style="font-family:'JetBrains Mono',monospace; font-size:11px; color:#F58585;">{{ lockError }}</div>
+      </sc-if>
+
+      <button onClick="{{ submitLock }}" style="font-family:'JetBrains Mono',monospace; font-size:11px; letter-spacing:.2em; text-transform:uppercase; color:#08090A; background:#C9F227; border:0; border-radius:0; padding:15px; cursor:pointer; width:100%;" style-hover="background:#E4FF7A;">Enter</button>
+
+      <div style="font-family:'JetBrains Mono',monospace; font-size:10px; line-height:1.7; color:#4A5254; border-top:1px solid #1C1F21; padding-top:16px;">{{ lockHint }}</div>
+    </div>
+  </div>
+</sc-if>
+
+<sc-if value="{{ isInternal }}">
+  <div style="padding:0 0 90px;">
+  <div style="max-width:1720px; margin:0 auto; padding:0 44px;">
+
+    <div style="display:flex; align-items:center; justify-content:space-between; gap:32px; flex-wrap:wrap; padding:24px 0 16px;">
+      <div style="display:flex; align-items:center; gap:14px;">
+        <span style="width:10px; height:10px; background:#C9F227;"></span>
+        <span style="font-family:'JetBrains Mono',monospace; font-size:10px; letter-spacing:.32em; text-transform:uppercase; color:#8C9490;">Internal · QA / Sups / FS</span>
+      </div>
+      <div style="display:flex; align-items:center; gap:10px;">
+        <span style="font-family:'JetBrains Mono',monospace; font-size:10px; letter-spacing:.24em; text-transform:uppercase; color:#5C6461;">{{ stamp }}</span>
+        <button onClick="{{ exportCsv }}" style="font-family:'JetBrains Mono',monospace; font-size:10px; letter-spacing:.18em; text-transform:uppercase; color:#08090A; background:#C9F227; border:0; border-radius:0; padding:9px 15px; cursor:pointer;" style-hover="background:#E4FF7A;">Export CSV</button>
+        <button onClick="{{ signOut }}" style="font-family:'JetBrains Mono',monospace; font-size:10px; letter-spacing:.18em; text-transform:uppercase; color:#8C9490; background:transparent; border:1px solid #23272A; border-radius:0; padding:9px 14px; cursor:pointer;" style-hover="border-color:#C9F227; color:#C9F227;">Sign out</button>
+      </div>
+    </div>
+
+    <div style="display:flex; gap:2px; border-bottom:1px solid #1C1F21;">
+      <sc-for list="{{ tabs }}" as="t" hint-placeholder-count="4">
+        <button onClick="{{ t.onClick }}" style="font-family:'JetBrains Mono',monospace; font-size:10px; letter-spacing:.2em; text-transform:uppercase; cursor:pointer; padding:14px 20px; border:0; border-bottom:2px solid {{ t.line }}; background:transparent; color:{{ t.fg }};" style-hover="color:#E8EAE6;">{{ t.label }}<span style="opacity:.4; margin-left:8px;">{{ t.count }}</span></button>
+      </sc-for>
+    </div>
+
+    <sc-if value="{{ tabMatrix }}">
+      <div style="display:grid; grid-template-columns:minmax(0,1.05fr) minmax(0,.85fr) minmax(0,1.35fr); border-bottom:1px solid #1C1F21;">
+        <div style="padding:34px 34px 34px 0; border-right:1px solid #1C1F21; animation:obRise .6s ease both;">
+          <div style="font-family:'JetBrains Mono',monospace; font-size:9.5px; letter-spacing:.28em; text-transform:uppercase; color:#6B736F;">Overall average</div>
+          <div style="display:flex; align-items:baseline; gap:14px; margin-top:10px;">
+            <div style="font-size:104px; font-weight:300; line-height:.82; letter-spacing:-.055em; color:#F4F7F0; font-variant-numeric:tabular-nums;">{{ orgAvg }}</div>
+            <div style="font-family:'JetBrains Mono',monospace; font-size:12px; white-space:nowrap; flex:none; color:{{ momColor }};">{{ momTxt }}</div>
+          </div>
+          <div style="margin-top:20px; font-size:13px; line-height:1.55; color:#8C9490; max-width:34ch; text-wrap:pretty;">{{ heroNote }}</div>
+        </div>
+
+        <div style="padding:34px 30px; border-right:1px solid #1C1F21; display:flex; flex-direction:column; animation:obRise .6s .06s ease both;">
+          <div style="font-family:'JetBrains Mono',monospace; font-size:9.5px; letter-spacing:.28em; text-transform:uppercase; color:#6B736F;">Distribution of agent averages</div>
+          <div style="flex:1; display:flex; align-items:flex-end; gap:3px; min-height:104px; margin-top:18px;">
+            <sc-for list="{{ hist }}" as="h" hint-placeholder-count="14">
+              <div title="{{ h.title }}" style="flex:1; display:flex; flex-direction:column; justify-content:flex-end; height:100%;">
+                <div style="height:{{ h.h }}; background:{{ h.color }};"></div>
+              </div>
+            </sc-for>
+          </div>
+          <div style="display:flex; justify-content:space-between; margin-top:9px; font-family:'JetBrains Mono',monospace; font-size:9.5px; color:#5C6461;">
+            <span>{{ histLo }}</span><span>{{ histHi }}</span>
+          </div>
+        </div>
+
+        <div style="padding:34px 0 34px 30px; display:flex; flex-direction:column; animation:obRise .6s .12s ease both;">
+          <div style="display:flex; flex-direction:column; align-items:flex-start; gap:5px;">
+            <div style="font-family:'JetBrains Mono',monospace; font-size:9.5px; letter-spacing:.28em; text-transform:uppercase; color:#6B736F;">Team average by month</div>
+            <div style="font-family:'JetBrains Mono',monospace; font-size:9.5px; line-height:1.4; color:#5C6461; text-wrap:pretty;">{{ trendRange }}</div>
+          </div>
+          <div style="position:relative; flex:1; min-height:120px; margin-top:16px;">
+            <svg viewBox="0 0 620 130" preserveAspectRatio="none" style="position:absolute; inset:0; width:100%; height:100%;">
+              <sc-for list="{{ trendGrid }}" as="g" hint-placeholder-count="3">
+                <line x1="0" y1="{{ g.y }}" x2="620" y2="{{ g.y }}" stroke="#1C1F21" stroke-width="1" vector-effect="non-scaling-stroke"></line>
+              </sc-for>
+              <polyline points="{{ trendArea }}" fill="rgba(201,242,39,.09)" stroke="none"></polyline>
+              <polyline points="{{ trendPath }}" fill="none" stroke="#C9F227" stroke-width="1.8" stroke-linejoin="round" stroke-linecap="round" vector-effect="non-scaling-stroke" stroke-dasharray="1400" style="animation:obDraw 1.1s .2s cubic-bezier(.4,0,.2,1) both;"></polyline>
+              <sc-for list="{{ trendPts }}" as="p" hint-placeholder-count="9">
+                <circle cx="{{ p.x }}" cy="{{ p.y }}" r="2.6" fill="#08090A" stroke="#C9F227" stroke-width="1.6" vector-effect="non-scaling-stroke"></circle>
+              </sc-for>
+            </svg>
+            <sc-for list="{{ trendPts }}" as="p" hint-placeholder-count="9">
+              <div style="position:absolute; left:{{ p.left }}; top:{{ p.top }}; transform:translate(-50%,-150%); font-family:'JetBrains Mono',monospace; font-size:9.5px; color:#A8B1AC; white-space:nowrap;">{{ p.txt }}</div>
+            </sc-for>
+            <sc-for list="{{ trendPts }}" as="p" hint-placeholder-count="9">
+              <div style="position:absolute; left:{{ p.left }}; bottom:-4px; transform:translateX(-50%); font-family:'JetBrains Mono',monospace; font-size:9px; letter-spacing:.08em; color:#5C6461; white-space:nowrap;">{{ p.month }}</div>
+            </sc-for>
+          </div>
+        </div>
+      </div>
+    </sc-if>
+
+    <div style="display:flex; flex-wrap:wrap; align-items:center; gap:16px; padding:16px 0; border-bottom:1px solid #1C1F21;">
+      <input type="text" placeholder="Search agent" value="{{ query }}" onInput="{{ onQuery }}" style="font-family:'JetBrains Mono',monospace; font-size:12px; color:#E8EAE6; background:#0E1113; border:1px solid #23272A; border-radius:0; padding:8px 12px; width:200px; outline:none;" style-focus="border-color:#C9F227;" />
+      <div style="display:flex; flex-wrap:wrap; gap:4px; flex:1; min-width:300px;">
+        <sc-for list="{{ teamChips }}" as="c" hint-placeholder-count="8">
+          <button onClick="{{ c.onClick }}" style="font-family:'JetBrains Mono',monospace; font-size:10px; letter-spacing:.1em; text-transform:uppercase; cursor:pointer; padding:6px 9px; border-radius:0; border:1px solid {{ c.border }}; background:{{ c.bg }}; color:{{ c.fg }}; display:flex; align-items:center; gap:7px;" style-hover="border-color:#4A5254;">
+            <span style="width:6px; height:6px; background:{{ c.dot }};"></span>{{ c.label }}<span style="opacity:.45;">{{ c.count }}</span>
+          </button>
+        </sc-for>
+      </div>
+      <sc-if value="{{ tabMatrix }}">
+        <div style="display:flex; align-items:center; gap:9px;">
+          <span style="font-family:'JetBrains Mono',monospace; font-size:9.5px; letter-spacing:.22em; text-transform:uppercase; color:#6B736F;">Min. months</span>
+          <input type="range" min="1" max="{{ maxMonths }}" step="1" value="{{ minMonths }}" onInput="{{ onMinMonths }}" style="width:92px;" />
+          <span style="font-family:'JetBrains Mono',monospace; font-size:12px; color:#C9F227; width:14px;">{{ minMonths }}</span>
+        </div>
+        <button onClick="{{ toggleGroup }}" style="font-family:'JetBrains Mono',monospace; font-size:10px; letter-spacing:.16em; text-transform:uppercase; cursor:pointer; padding:8px 12px; border-radius:0; border:1px solid {{ groupBorder }}; background:{{ groupBg }}; color:{{ groupFg }};" style-hover="border-color:#4A5254;">Group by team</button>
+      </sc-if>
+    </div>
+
+    <sc-if value="{{ loading }}" hint-placeholder-val="{{ true }}">
+      <div style="padding:130px 0; text-align:center; font-family:'JetBrains Mono',monospace; font-size:10.5px; letter-spacing:.3em; text-transform:uppercase; color:#4A5254;">Loading evaluation data</div>
+    </sc-if>
+
+    <sc-if value="{{ showMatrix }}">
+      <div style="overflow-x:auto;">
+        <div style="min-width:1180px;">
+          <div style="display:grid; grid-template-columns:{{ gridCols }}; align-items:end; border-bottom:1px solid #23272A; background:#08090A; position:sticky; top:0; z-index:3;">
+            <div onClick="{{ sortByName }}" style="padding:14px 14px 8px 0; font-family:'JetBrains Mono',monospace; font-size:9.5px; letter-spacing:.24em; text-transform:uppercase; color:{{ nameHeadColor }}; cursor:pointer; position:sticky; left:0; background:#08090A;" style-hover="color:#C9F227;">Agent</div>
+            <sc-for list="{{ monthCols }}" as="m" hint-placeholder-count="9">
+              <div onClick="{{ m.onClick }}" style="padding:14px 3px 8px; text-align:center; font-family:'JetBrains Mono',monospace; font-size:9.5px; letter-spacing:.1em; text-transform:uppercase; color:{{ m.color }}; cursor:pointer;" style-hover="color:#C9F227;">{{ m.label }}</div>
+            </sc-for>
+            <div style="padding:14px 8px 8px; text-align:center; font-family:'JetBrains Mono',monospace; font-size:9.5px; letter-spacing:.24em; text-transform:uppercase; color:#6B736F;">Trend</div>
+            <div onClick="{{ sortByAvg }}" style="padding:14px 0 8px 8px; text-align:right; font-family:'JetBrains Mono',monospace; font-size:9.5px; letter-spacing:.24em; text-transform:uppercase; color:{{ avgHeadColor }}; cursor:pointer;" style-hover="color:#C9F227;">Avg</div>
+          </div>
+
+          <sc-for list="{{ rows }}" as="r" hint-placeholder-count="16">
+            <div>
+              <sc-if value="{{ r.isGroup }}">
+                <div style="display:flex; align-items:baseline; gap:12px; padding:24px 0 8px;">
+                  <span style="width:7px; height:7px; background:{{ r.dot }};"></span>
+                  <span style="font-family:'JetBrains Mono',monospace; font-size:10px; letter-spacing:.26em; text-transform:uppercase; color:#D6DAD4;">{{ r.label }}</span>
+                  <span style="flex:1; height:1px; background:#1C1F21;"></span>
+                  <span style="font-family:'JetBrains Mono',monospace; font-size:9.5px; letter-spacing:.08em; color:#5C6461;">{{ r.meta }}</span>
+                </div>
+              </sc-if>
+              <sc-if value="{{ r.isAgent }}">
+                <div onClick="{{ r.onClick }}" style="display:grid; grid-template-columns:{{ gridCols }}; align-items:stretch; border-bottom:1px solid #131618; cursor:pointer; background:{{ r.rowBg }};" style-hover="background:#101315;">
+                  <div style="display:flex; align-items:center; gap:10px; padding:0 14px 0 0; min-width:0; position:sticky; left:0; background:{{ r.stickyBg }};">
+                    <div style="width:2px; align-self:stretch; background:{{ r.teamColor }};"></div>
+                    <div style="min-width:0; padding:8px 0;">
+                      <div style="font-size:13px; line-height:1.3; color:#E8EAE6; white-space:nowrap; overflow:hidden; text-overflow:ellipsis;">{{ r.name }}</div>
+                      <div style="font-family:'JetBrains Mono',monospace; font-size:9px; letter-spacing:.14em; text-transform:uppercase; color:#5C6461; white-space:nowrap;">{{ r.team }}</div>
+                    </div>
+                    <sc-if value="{{ r.hasFlag }}"><span title="Flagged evaluation" style="width:6px; height:6px; background:#FF6B6B; margin-left:auto; flex:none;"></span></sc-if>
+                  </div>
+                  <sc-for list="{{ r.cells }}" as="c" hint-placeholder-count="9">
+                    <div title="{{ c.title }}" style="margin:3px 2px; display:flex; align-items:center; justify-content:center; font-family:'JetBrains Mono',monospace; font-size:11.5px; font-weight:500; font-variant-numeric:tabular-nums; background:{{ c.bg }}; color:{{ c.fg }}; border:1px solid {{ c.bd }}; animation:obCell .34s ease both; animation-delay:{{ c.delay }};">{{ c.txt }}</div>
+                  </sc-for>
+                  <div style="display:flex; align-items:center; justify-content:flex-end; gap:9px; padding:0 8px;">
+                    <svg viewBox="0 0 100 26" preserveAspectRatio="none" style="width:66px; height:20px; overflow:visible;">
+                      <polyline points="{{ r.spark }}" fill="none" stroke="{{ r.sparkColor }}" stroke-width="1.4" stroke-linejoin="round" stroke-linecap="round" vector-effect="non-scaling-stroke"></polyline>
+                    </svg>
+                    <span style="font-family:'JetBrains Mono',monospace; font-size:10.5px; font-variant-numeric:tabular-nums; color:{{ r.deltaColor }}; width:40px; text-align:right;">{{ r.delta }}</span>
+                  </div>
+                  <div style="display:flex; align-items:center; justify-content:flex-end; padding:0 0 0 8px; font-size:17px; font-variant-numeric:tabular-nums; letter-spacing:-.02em; color:{{ r.avgColor }};">{{ r.avg }}</div>
+                </div>
+              </sc-if>
+            </div>
+          </sc-for>
+
+          <sc-if value="{{ empty }}">
+            <div style="padding:80px 0; text-align:center; font-family:'JetBrains Mono',monospace; font-size:10.5px; letter-spacing:.24em; text-transform:uppercase; color:#4A5254;">No agents match these filters</div>
+          </sc-if>
+        </div>
+      </div>
+
+      <div style="display:flex; align-items:center; gap:20px; margin-top:20px; flex-wrap:wrap; padding-top:14px; border-top:1px solid #23272A;">
+        <span style="font-family:'JetBrains Mono',monospace; font-size:9.5px; letter-spacing:.24em; text-transform:uppercase; color:#6B736F;">Score scale</span>
+        <div style="display:flex; gap:2px;">
+          <sc-for list="{{ legend }}" as="l" hint-placeholder-count="5">
+            <div style="display:flex; flex-direction:column; gap:6px; width:76px;">
+              <span style="height:8px; background:{{ l.bg }}; border:1px solid {{ l.bd }};"></span>
+              <span style="font-family:'JetBrains Mono',monospace; font-size:9px; letter-spacing:.08em; color:#6B736F;">{{ l.label }}</span>
+            </div>
+          </sc-for>
+        </div>
+        <span style="flex:1;"></span>
+        <span style="font-family:'JetBrains Mono',monospace; font-size:9.5px; letter-spacing:.1em; color:#4A5254;">{{ footnote }}</span>
+      </div>
+    </sc-if>
+
+    <sc-if value="{{ tabCoaching }}">
+      <div style="display:grid; grid-template-columns:repeat(auto-fill,minmax(400px,1fr)); gap:1px; background:#1C1F21; border:1px solid #1C1F21; margin-top:22px;">
+        <sc-for list="{{ coaching }}" as="c" hint-placeholder-count="6">
+          <div style="background:#0B0D0F; padding:22px 24px; display:flex; flex-direction:column; gap:16px;">
+            <div style="display:flex; justify-content:space-between; align-items:flex-start; gap:14px;">
+              <div style="display:flex; gap:12px; align-items:stretch; min-width:0;">
+                <div style="width:2px; background:{{ c.teamColor }};"></div>
+                <div style="min-width:0;">
+                  <div onClick="{{ c.onClick }}" style="font-size:17px; letter-spacing:-.02em; color:#E8EAE6; cursor:pointer; white-space:nowrap; overflow:hidden; text-overflow:ellipsis;" style-hover="color:#C9F227;">{{ c.name }}</div>
+                  <div style="font-family:'JetBrains Mono',monospace; font-size:9px; letter-spacing:.14em; text-transform:uppercase; color:#5C6461; margin-top:4px;">{{ c.team }} · owner {{ c.owner }}</div>
+                </div>
+              </div>
+              <div style="text-align:right; flex:none;">
+                <div style="font-size:26px; font-variant-numeric:tabular-nums; letter-spacing:-.02em; color:{{ c.avgColor }};">{{ c.avg }}</div>
+                <div style="font-family:'JetBrains Mono',monospace; font-size:9px; letter-spacing:.1em; color:{{ c.deltaColor }};">{{ c.delta }}</div>
+              </div>
+            </div>
+
+            <div style="display:flex; flex-direction:column; gap:9px;">
+              <div style="font-family:'JetBrains Mono',monospace; font-size:9px; letter-spacing:.22em; text-transform:uppercase; color:#6B736F;">Coaching notes</div>
+              <sc-for list="{{ c.notes }}" as="n" hint-placeholder-count="2">
+                <div style="border-left:1px solid #23272A; padding-left:12px;">
+                  <div style="font-size:13px; line-height:1.5; color:#C4C9C4; text-wrap:pretty;">{{ n.text }}</div>
+                  <div style="font-family:'JetBrains Mono',monospace; font-size:9px; letter-spacing:.1em; color:#4A5254; margin-top:5px;">{{ n.author }} · {{ n.date }}</div>
+                </div>
+              </sc-for>
+            </div>
+
+            <sc-if value="{{ c.hasActions }}">
+              <div style="display:flex; flex-direction:column; gap:7px;">
+                <div style="font-family:'JetBrains Mono',monospace; font-size:9px; letter-spacing:.22em; text-transform:uppercase; color:#6B736F;">Follow-up</div>
+                <sc-for list="{{ c.actions }}" as="a" hint-placeholder-count="1">
+                  <div style="display:flex; align-items:baseline; gap:10px;">
+                    <span style="width:7px; height:7px; flex:none; border:1px solid {{ a.mark }}; background:{{ a.fill }};"></span>
+                    <span style="font-size:12.5px; line-height:1.45; color:{{ a.color }}; text-wrap:pretty;">{{ a.text }}</span>
+                    <span style="flex:1;"></span>
+                    <span style="font-family:'JetBrains Mono',monospace; font-size:9px; color:#4A5254; white-space:nowrap;">{{ a.due }}</span>
+                  </div>
+                </sc-for>
+              </div>
+            </sc-if>
+
+            <div style="display:flex; flex-direction:column; gap:8px; border-top:1px solid #131618; padding-top:14px;">
+              <div style="font-family:'JetBrains Mono',monospace; font-size:9px; letter-spacing:.22em; text-transform:uppercase; color:#6B736F;">Latest evaluation</div>
+              <div style="font-size:13px; line-height:1.5; color:#C4C9C4; text-wrap:pretty;">{{ c.lastComment }}</div>
+              <div style="display:flex; align-items:center; gap:10px;">
+                <a href="{{ c.lastLink }}" target="_blank" rel="noreferrer" style="font-family:'JetBrains Mono',monospace; font-size:10px; letter-spacing:.06em;">{{ c.lastId }}</a>
+                <span style="font-family:'JetBrains Mono',monospace; font-size:9px; letter-spacing:.1em; color:#4A5254;">{{ c.lastMeta }}</span>
+              </div>
+            </div>
+          </div>
+        </sc-for>
+      </div>
+    </sc-if>
+
+    <sc-if value="{{ tabCalibration }}">
+      <div style="margin-top:22px; overflow-x:auto;">
+        <div style="min-width:1000px;">
+          <div style="display:grid; grid-template-columns:230px 92px 78px 150px 1fr 168px; padding:12px 0 9px; border-bottom:1px solid #23272A; font-family:'JetBrains Mono',monospace; font-size:9px; letter-spacing:.2em; text-transform:uppercase; color:#6B736F;">
+            <div>Agent</div><div>Date</div><div>Score</div><div>Evaluator</div><div>Comment</div><div style="text-align:right;">Conversation</div>
+          </div>
+          <sc-for list="{{ flags }}" as="f" hint-placeholder-count="8">
+            <div style="display:grid; grid-template-columns:230px 92px 78px 150px 1fr 168px; align-items:center; padding:12px 0; border-bottom:1px solid #131618;">
+              <div style="display:flex; align-items:center; gap:9px; min-width:0; padding-right:14px;">
+                <span style="width:6px; height:6px; flex:none; background:{{ f.flagColor }};"></span>
+                <span onClick="{{ f.onClick }}" style="font-size:13px; color:#E8EAE6; cursor:pointer; white-space:nowrap; overflow:hidden; text-overflow:ellipsis;" style-hover="color:#C9F227;">{{ f.name }}</span>
+              </div>
+              <div style="font-family:'JetBrains Mono',monospace; font-size:10.5px; color:#8C9490;">{{ f.date }}</div>
+              <div style="font-family:'JetBrains Mono',monospace; font-size:12px; font-variant-numeric:tabular-nums; color:{{ f.scoreColor }};">{{ f.score }}</div>
+              <div style="font-family:'JetBrains Mono',monospace; font-size:10.5px; color:#8C9490;">{{ f.evaluator }}</div>
+              <div style="font-size:12.5px; line-height:1.45; color:#A8B1AC; padding-right:18px; text-wrap:pretty;">{{ f.comment }}</div>
+              <div style="text-align:right;">
+                <a href="{{ f.link }}" target="_blank" rel="noreferrer" style="font-family:'JetBrains Mono',monospace; font-size:10px;">{{ f.id }}</a>
+                <div style="font-family:'JetBrains Mono',monospace; font-size:8.5px; letter-spacing:.18em; text-transform:uppercase; color:{{ f.flagColor }}; margin-top:3px;">{{ f.flag }}</div>
+              </div>
+            </div>
+          </sc-for>
+          <sc-if value="{{ noFlags }}">
+            <div style="padding:80px 0; text-align:center; font-family:'JetBrains Mono',monospace; font-size:10.5px; letter-spacing:.24em; text-transform:uppercase; color:#4A5254;">Nothing flagged in this selection</div>
+          </sc-if>
+        </div>
+      </div>
+    </sc-if>
+
+    <sc-if value="{{ tabEvaluators }}">
+      <div style="margin-top:26px; display:grid; grid-template-columns:repeat(auto-fit,minmax(280px,1fr)); gap:1px; background:#1C1F21; border:1px solid #1C1F21;">
+        <sc-for list="{{ evaluators }}" as="e" hint-placeholder-count="5">
+          <div style="background:#0B0D0F; padding:24px;">
+            <div style="display:flex; justify-content:space-between; align-items:baseline;">
+              <div style="font-size:17px; letter-spacing:-.02em; color:#E8EAE6;">{{ e.name }}</div>
+              <div style="font-family:'JetBrains Mono',monospace; font-size:10px; color:#5C6461;">{{ e.count }} evals</div>
+            </div>
+            <div style="display:flex; align-items:baseline; gap:12px; margin-top:16px;">
+              <div style="font-size:44px; font-weight:300; letter-spacing:-.04em; font-variant-numeric:tabular-nums; color:{{ e.color }};">{{ e.avg }}</div>
+              <div style="font-family:'JetBrains Mono',monospace; font-size:10.5px; color:{{ e.deltaColor }};">{{ e.delta }}</div>
+            </div>
+            <div style="height:5px; background:#131618; margin-top:18px; display:flex;">
+              <sc-for list="{{ e.mix }}" as="m" hint-placeholder-count="5">
+                <div title="{{ m.title }}" style="width:{{ m.w }}; background:{{ m.color }};"></div>
+              </sc-for>
+            </div>
+            <div style="font-family:'JetBrains Mono',monospace; font-size:9px; letter-spacing:.14em; text-transform:uppercase; color:#4A5254; margin-top:10px;">{{ e.mixNote }}</div>
+            <div style="font-size:12.5px; line-height:1.5; color:#8C9490; margin-top:14px; text-wrap:pretty;">{{ e.note }}</div>
+          </div>
+        </sc-for>
+      </div>
+      <div style="margin-top:16px; font-family:'JetBrains Mono',monospace; font-size:9.5px; letter-spacing:.1em; color:#4A5254;">Delta compares each evaluator's average score against the overall average of every evaluation in the current selection.</div>
+    </sc-if>
+
+  </div>
+  </div>
+</sc-if>
+
+<sc-if value="{{ clerk }}">
+  <div style="max-width:1160px; margin:0 auto; padding:0 44px 90px;">
+    <div style="display:flex; align-items:center; justify-content:space-between; gap:24px; flex-wrap:wrap; padding:24px 0 16px;">
+      <div style="display:flex; align-items:center; gap:14px;">
+        <span style="width:10px; height:10px; background:#C9F227;"></span>
+        <span style="font-family:'JetBrains Mono',monospace; font-size:10px; letter-spacing:.32em; text-transform:uppercase; color:#8C9490;">Your evaluations · private</span>
+      </div>
+      <button onClick="{{ signOut }}" style="font-family:'JetBrains Mono',monospace; font-size:10px; letter-spacing:.18em; text-transform:uppercase; color:#8C9490; background:transparent; border:1px solid #23272A; border-radius:0; padding:9px 14px; cursor:pointer;" style-hover="border-color:#C9F227; color:#C9F227;">Sign out</button>
+    </div>
+
+    <div style="display:grid; grid-template-columns:minmax(0,1fr) minmax(0,1.25fr); gap:44px; align-items:end; padding:26px 0 34px; border-top:1px solid #1C1F21; border-bottom:1px solid #1C1F21; animation:obRise .6s ease both;">
+      <div>
+        <h1 style="margin:0; font-size:54px; font-weight:300; line-height:.95; letter-spacing:-.045em; color:#F4F7F0;">{{ clerk.name }}</h1>
+        <div style="font-family:'JetBrains Mono',monospace; font-size:10px; letter-spacing:.26em; text-transform:uppercase; color:#5C6461; margin-top:12px;">{{ clerk.team }}</div>
+        <div style="display:flex; align-items:baseline; gap:16px; margin-top:28px;">
+          <div style="font-size:88px; font-weight:300; line-height:.82; letter-spacing:-.055em; font-variant-numeric:tabular-nums; color:{{ clerk.avgColor }};">{{ clerk.avg }}</div>
+          <div>
+            <div style="font-family:'JetBrains Mono',monospace; font-size:9px; letter-spacing:.22em; text-transform:uppercase; color:#6B736F;">Your average</div>
+            <div style="font-family:'JetBrains Mono',monospace; font-size:11.5px; color:{{ clerk.deltaColor }}; margin-top:5px;">{{ clerk.deltaTxt }}</div>
+          </div>
+        </div>
+      </div>
+      <div style="position:relative; aspect-ratio:620/240;">
+        <svg viewBox="0 0 620 240" preserveAspectRatio="none" style="position:absolute; inset:0; width:100%; height:100%;">
+          <sc-for list="{{ clerk.grid }}" as="g" hint-placeholder-count="5">
+            <line x1="34" y1="{{ g.y }}" x2="612" y2="{{ g.y }}" stroke="#1C1F21" stroke-width="1" vector-effect="non-scaling-stroke"></line>
+          </sc-for>
+          <polyline points="{{ clerk.path }}" fill="none" stroke="#C9F227" stroke-width="2" stroke-linejoin="round" stroke-linecap="round" vector-effect="non-scaling-stroke" stroke-dasharray="1400" style="animation:obDraw 1.1s .25s cubic-bezier(.4,0,.2,1) both;"></polyline>
+          <sc-for list="{{ clerk.points }}" as="p" hint-placeholder-count="8">
+            <circle cx="{{ p.x }}" cy="{{ p.y }}" r="3.6" fill="#08090A" stroke="{{ p.color }}" stroke-width="2" vector-effect="non-scaling-stroke"></circle>
+          </sc-for>
+        </svg>
+        <sc-for list="{{ clerk.grid }}" as="g" hint-placeholder-count="5">
+          <div style="position:absolute; left:0; top:{{ g.top }}; width:26px; transform:translateY(-50%); text-align:right; font-family:'JetBrains Mono',monospace; font-size:9px; color:#4A5254;">{{ g.label }}</div>
+        </sc-for>
+        <sc-for list="{{ clerk.points }}" as="p" hint-placeholder-count="8">
+          <div style="position:absolute; left:{{ p.left }}; top:{{ p.labelTop }}; transform:translate(-50%,-100%); font-family:'JetBrains Mono',monospace; font-size:10.5px; white-space:nowrap; color:#D6DAD4;">{{ p.txt }}</div>
+        </sc-for>
+        <sc-for list="{{ clerk.points }}" as="p" hint-placeholder-count="8">
+          <div style="position:absolute; left:{{ p.left }}; bottom:0; transform:translateX(-50%); font-family:'JetBrains Mono',monospace; font-size:9px; letter-spacing:.08em; white-space:nowrap; color:#4A5254;">{{ p.month }}</div>
+        </sc-for>
+      </div>
+    </div>
+
+    <div style="display:grid; grid-template-columns:repeat(auto-fit,minmax(150px,1fr)); border-bottom:1px solid #1C1F21;">
+      <sc-for list="{{ clerk.months }}" as="m" hint-placeholder-count="9">
+        <div style="padding:20px 18px 20px 0; border-right:1px solid #1C1F21;">
+          <div style="font-family:'JetBrains Mono',monospace; font-size:9px; letter-spacing:.2em; text-transform:uppercase; color:#6B736F;">{{ m.label }}</div>
+          <div style="font-size:30px; font-weight:300; letter-spacing:-.03em; margin-top:8px; font-variant-numeric:tabular-nums; color:{{ m.color }};">{{ m.value }}</div>
+        </div>
+      </sc-for>
+    </div>
+
+    <div style="display:grid; grid-template-columns:minmax(0,1fr) minmax(0,1fr); gap:44px; margin-top:40px;">
+      <div>
+        <div style="font-family:'JetBrains Mono',monospace; font-size:9.5px; letter-spacing:.26em; text-transform:uppercase; color:#6B736F;">Feedback from QA</div>
+        <div style="display:flex; flex-direction:column; gap:2px; margin-top:16px;">
+          <sc-for list="{{ clerk.comments }}" as="c" hint-placeholder-count="5">
+            <div style="background:#0B0D0F; border-left:2px solid {{ c.color }}; padding:16px 18px;">
+              <div style="display:flex; justify-content:space-between; align-items:baseline; gap:14px;">
+                <span style="font-family:'JetBrains Mono',monospace; font-size:9.5px; letter-spacing:.16em; text-transform:uppercase; color:#5C6461;">{{ c.date }}</span>
+                <span style="font-family:'JetBrains Mono',monospace; font-size:13px; font-variant-numeric:tabular-nums; color:{{ c.color }};">{{ c.score }}</span>
+              </div>
+              <div style="font-size:13.5px; line-height:1.55; color:#C4C9C4; margin-top:9px; text-wrap:pretty;">{{ c.comment }}</div>
+            </div>
+          </sc-for>
+        </div>
+      </div>
+      <div>
+        <div style="font-family:'JetBrains Mono',monospace; font-size:9.5px; letter-spacing:.26em; text-transform:uppercase; color:#6B736F;">Conversations reviewed</div>
+        <div style="display:flex; flex-direction:column; margin-top:16px;">
+          <sc-for list="{{ clerk.convos }}" as="c" hint-placeholder-count="6">
+            <div style="display:flex; align-items:center; justify-content:space-between; gap:16px; padding:13px 0; border-bottom:1px solid #131618;">
+              <a href="{{ c.link }}" target="_blank" rel="noreferrer" style="font-family:'JetBrains Mono',monospace; font-size:11.5px; letter-spacing:.04em;">{{ c.id }}</a>
+              <span style="font-family:'JetBrains Mono',monospace; font-size:9.5px; letter-spacing:.14em; text-transform:uppercase; color:#4A5254;">{{ c.date }}</span>
+              <span style="font-family:'JetBrains Mono',monospace; font-size:12px; font-variant-numeric:tabular-nums; color:{{ c.color }}; width:44px; text-align:right;">{{ c.score }}</span>
+            </div>
+          </sc-for>
+        </div>
+        <div style="font-family:'JetBrains Mono',monospace; font-size:9.5px; line-height:1.7; color:#4A5254; margin-top:18px;">{{ clerk.note }}</div>
+      </div>
+    </div>
+  </div>
+</sc-if>
+
+<sc-if value="{{ detail }}">
+  <div onClick="{{ closeDetail }}" style="position:fixed; inset:0; background:rgba(4,5,6,.72); z-index:40;"></div>
+  <div style="position:fixed; top:0; right:0; bottom:0; width:min(660px,96vw); background:#0B0D0F; border-left:1px solid #23272A; z-index:41; overflow-y:auto; padding:30px 34px 46px; animation:obSlide .26s cubic-bezier(.2,.8,.2,1);">
+    <div style="display:flex; align-items:flex-start; justify-content:space-between; gap:18px; padding-bottom:18px; border-bottom:1px solid #23272A;">
+      <div style="display:flex; gap:14px; align-items:stretch;">
+        <div style="width:3px; background:{{ detail.teamColor }};"></div>
+        <div>
+          <div style="font-size:30px; font-weight:400; line-height:1.05; letter-spacing:-.03em;">{{ detail.name }}</div>
+          <div style="font-family:'JetBrains Mono',monospace; font-size:9.5px; letter-spacing:.24em; text-transform:uppercase; color:#5C6461; margin-top:7px;">{{ detail.team }} · owner {{ detail.owner }}</div>
+        </div>
+      </div>
+      <button onClick="{{ closeDetail }}" style="font-family:'JetBrains Mono',monospace; font-size:9.5px; letter-spacing:.18em; text-transform:uppercase; color:#8C9490; background:transparent; border:1px solid #23272A; border-radius:0; padding:7px 11px; cursor:pointer;" style-hover="border-color:#C9F227; color:#C9F227;">Close</button>
+    </div>
+
+    <div style="display:grid; grid-template-columns:repeat(3,1fr); border-bottom:1px solid #1C1F21;">
+      <sc-for list="{{ detail.stats }}" as="s" hint-placeholder-count="3">
+        <div style="padding:18px 14px 18px 0; border-right:1px solid #1C1F21;">
+          <div style="font-family:'JetBrains Mono',monospace; font-size:9px; letter-spacing:.22em; text-transform:uppercase; color:#6B736F;">{{ s.label }}</div>
+          <div style="font-size:26px; font-weight:400; margin-top:8px; letter-spacing:-.02em; font-variant-numeric:tabular-nums; color:{{ s.color }};">{{ s.value }}</div>
+        </div>
+      </sc-for>
+    </div>
+
+    <div style="margin-top:26px;">
+      <div style="font-family:'JetBrains Mono',monospace; font-size:9px; letter-spacing:.24em; text-transform:uppercase; color:#6B736F;">Month by month</div>
+      <div style="position:relative; margin-top:18px; aspect-ratio:520/210;">
+        <svg viewBox="0 0 520 210" preserveAspectRatio="none" style="position:absolute; inset:0; width:100%; height:100%;">
+          <sc-for list="{{ detail.grid }}" as="g" hint-placeholder-count="5">
+            <line x1="34" y1="{{ g.y }}" x2="512" y2="{{ g.y }}" stroke="#1C1F21" stroke-width="1" vector-effect="non-scaling-stroke"></line>
+          </sc-for>
+          <polyline points="{{ detail.teamPath }}" fill="none" stroke="#3E4649" stroke-width="1.2" stroke-dasharray="3 3" vector-effect="non-scaling-stroke"></polyline>
+          <polyline points="{{ detail.path }}" fill="none" stroke="#C9F227" stroke-width="1.9" stroke-linejoin="round" stroke-linecap="round" vector-effect="non-scaling-stroke"></polyline>
+          <sc-for list="{{ detail.points }}" as="p" hint-placeholder-count="6">
+            <circle cx="{{ p.x }}" cy="{{ p.y }}" r="3.4" fill="#0B0D0F" stroke="{{ p.color }}" stroke-width="1.8" vector-effect="non-scaling-stroke"></circle>
+          </sc-for>
+        </svg>
+        <sc-for list="{{ detail.grid }}" as="g" hint-placeholder-count="5">
+          <div style="position:absolute; left:0; top:{{ g.top }}; width:26px; transform:translateY(-50%); text-align:right; font-family:'JetBrains Mono',monospace; font-size:9px; color:#4A5254;">{{ g.label }}</div>
+        </sc-for>
+        <sc-for list="{{ detail.points }}" as="p" hint-placeholder-count="6">
+          <div style="position:absolute; left:{{ p.left }}; top:{{ p.labelTop }}; transform:translate(-50%,-100%); font-family:'JetBrains Mono',monospace; font-size:10px; white-space:nowrap; color:#D6DAD4;">{{ p.txt }}</div>
+        </sc-for>
+        <sc-for list="{{ detail.points }}" as="p" hint-placeholder-count="6">
+          <div style="position:absolute; left:{{ p.left }}; bottom:0; transform:translateX(-50%); font-family:'JetBrains Mono',monospace; font-size:9px; letter-spacing:.06em; white-space:nowrap; color:#4A5254;">{{ p.month }}</div>
+        </sc-for>
+      </div>
+      <div style="display:flex; gap:20px; margin-top:14px; font-family:'JetBrains Mono',monospace; font-size:9.5px; letter-spacing:.08em; color:#6B736F;">
+        <span style="display:flex; align-items:center; gap:7px;"><span style="width:16px; height:2px; background:#C9F227;"></span>{{ detail.name }}</span>
+        <span style="display:flex; align-items:center; gap:7px;"><span style="width:16px; height:1px; background:#3E4649;"></span>{{ detail.team }} avg</span>
+      </div>
+    </div>
+
+    <div style="margin-top:32px;">
+      <div style="font-family:'JetBrains Mono',monospace; font-size:9px; letter-spacing:.24em; text-transform:uppercase; color:#6B736F;">Evaluations &amp; conversations</div>
+      <div style="display:flex; flex-direction:column; margin-top:14px;">
+        <sc-for list="{{ detail.evals }}" as="e" hint-placeholder-count="6">
+          <div style="padding:14px 0; border-bottom:1px solid #131618;">
+            <div style="display:flex; align-items:center; gap:12px;">
+              <span style="font-family:'JetBrains Mono',monospace; font-size:13px; font-variant-numeric:tabular-nums; color:{{ e.color }}; width:44px;">{{ e.score }}</span>
+              <a href="{{ e.link }}" target="_blank" rel="noreferrer" style="font-family:'JetBrains Mono',monospace; font-size:11px;">{{ e.id }}</a>
+              <span style="flex:1;"></span>
+              <sc-if value="{{ e.hasFlag }}"><span style="font-family:'JetBrains Mono',monospace; font-size:8.5px; letter-spacing:.18em; text-transform:uppercase; color:{{ e.flagColor }}; border:1px solid {{ e.flagColor }}; padding:2px 6px;">{{ e.flag }}</span></sc-if>
+              <span style="font-family:'JetBrains Mono',monospace; font-size:9.5px; letter-spacing:.12em; text-transform:uppercase; color:#4A5254;">{{ e.date }}</span>
+            </div>
+            <div style="font-size:12.5px; line-height:1.5; color:#A8B1AC; margin-top:8px; text-wrap:pretty;">{{ e.comment }}</div>
+            <div style="font-family:'JetBrains Mono',monospace; font-size:9px; letter-spacing:.12em; text-transform:uppercase; color:#4A5254; margin-top:6px;">by {{ e.evaluator }}</div>
+          </div>
+        </sc-for>
+      </div>
+    </div>
+
+    <div style="margin-top:30px; border-top:1px solid #1C1F21; padding-top:18px;">
+      <div style="font-family:'JetBrains Mono',monospace; font-size:9px; letter-spacing:.24em; text-transform:uppercase; color:#6B736F;">Access</div>
+      <div style="display:flex; align-items:center; gap:14px; margin-top:12px;">
+        <span style="font-size:12.5px; color:#8C9490;">Personal PIN for their own view</span>
+        <span style="font-family:'JetBrains Mono',monospace; font-size:15px; letter-spacing:.3em; color:#C9F227;">{{ detail.pin }}</span>
+      </div>
+    </div>
+  </div>
+</sc-if>
+
+</div>
+</x-dc>
+<script type="text/x-dc" data-dc-script data-props="{&quot;$preview&quot;:{&quot;width&quot;:1720,&quot;height&quot;:1000}}">
+const TEAM_COLORS = {
+  'T1':'#C9F227','T2':'#4CC9F0','T3':'#F5A524','Seniors ':'#FF6B6B','Seniors':'#FF6B6B',
+  'VIP ':'#D084F5','VIP':'#D084F5','3rd Party Squad':'#2DD4BF','Processing Specialist':'#A3E635',
+  'Night Shift':'#8B93F8','Sups / FS':'#FB923C','Deposits':'#34D399','Payouts':'#F472B6','New Hire':'#8C9490'
+};
+const BANDS = [
+  {min:97, c:'#DFF77F', bg:'rgba(201,242,39,.16)', bd:'rgba(201,242,39,.34)', label:'97 +'},
+  {min:93, c:'#A7E8A0', bg:'rgba(110,231,140,.10)', bd:'rgba(110,231,140,.22)', label:'93 – 97'},
+  {min:88, c:'#8FBDD6', bg:'rgba(76,201,240,.09)', bd:'rgba(76,201,240,.20)', label:'88 – 93'},
+  {min:80, c:'#F0B26B', bg:'rgba(245,165,36,.10)', bd:'rgba(245,165,36,.24)', label:'80 – 88'},
+  {min:-1, c:'#F58585', bg:'rgba(255,107,107,.12)', bd:'rgba(255,107,107,.28)', label:'< 80'}
+];
+const band = v => BANDS.find(b => v >= b.min);
+const SKEY = 'qa-console-session';
+
+class Component extends DCLogic {
+  state = {
+    data:null, extras:null,
+    session:null, lockRole:'internal', lockName:'', lockPin:'', lockError:'',
+    tab:'matrix', query:'', teams:[], minMonths:1, group:true,
+    sort:{key:'avg', dir:-1}, sel:null
+  };
+
+  componentDidMount() {
+    let session = null;
+    try { session = JSON.parse(localStorage.getItem(SKEY) || 'null'); } catch (e) {}
+    if (session) this.setState({ session });
+    Promise.all([
+      fetch('./tracker-data.json').then(r => r.json()),
+      fetch('./qa-extras.json').then(r => r.json())
+    ]).then(([d, x]) => {
+      const months = d.months.filter(m => d.agents.some(a => a.s[m] != null));
+      this.setState({ data:{ months, agents:d.agents.filter(a => months.some(m => a.s[m] != null)) }, extras:x });
+    }).catch(() => this.setState({ data:{ months:[], agents:[] }, extras:{ agents:{}, intercomBase:'', teamPin:'0000' } }));
+  }
+
+  short(m) { return m.replace(/ 20/, " '"); }
+  teamColor(t) { return TEAM_COLORS[(t||'').trim()] || '#8C9490'; }
+  ex(name) { return (this.state.extras && this.state.extras.agents[name]) || { evals:[], notes:[], actions:[], pin:'----', owner:'—' }; }
+  link(id) { return (this.state.extras ? this.state.extras.intercomBase : '') + id + '?view=List'; }
+
+  enrich(a, months) {
+    const vals = months.map(m => (a.s[m] == null ? null : a.s[m]));
+    const nums = vals.filter(v => v != null);
+    const avg = nums.length ? nums.reduce((x,y)=>x+y,0)/nums.length : null;
+    const last = nums[nums.length-1], prev = nums[nums.length-2];
+    return { ...a, vals, nums, avg, count:nums.length,
+      delta: (last != null && prev != null) ? last - prev : null };
+  }
+
+  visible() {
+    const D = this.state.data; if (!D) return { months:[], list:[] };
+    const months = D.months;
+    const q = this.state.query.trim().toLowerCase();
+    const floor = this.state.tab === 'matrix' ? this.state.minMonths : 1;
+    let list = D.agents.map(a => this.enrich(a, months))
+      .filter(a => a.count >= floor)
+      .filter(a => !q || a.n.toLowerCase().includes(q))
+      .filter(a => !this.state.teams.length || this.state.teams.includes((a.t||'').trim()));
+    const { key, dir } = this.state.sort;
+    list.sort((x,y) => {
+      if (key === 'name') return dir * x.n.localeCompare(y.n);
+      const gx = key === 'avg' ? x.avg : x.s[key], gy = key === 'avg' ? y.avg : y.s[key];
+      if (gx == null && gy == null) return 0;
+      if (gx == null) return 1;
+      if (gy == null) return -1;
+      return dir * (gx - gy);
+    });
+    return { months, list };
+  }
+
+  exportCsv = () => {
+    const { months, list } = this.visible();
+    const esc = s => '"' + String(s).replace(/"/g,'""') + '"';
+    const lines = [['Team','Agent', ...months, 'Average'].map(esc).join(',')];
+    list.forEach(a => lines.push([esc(a.t), esc(a.n), ...a.vals.map(v => v == null ? '' : v.toFixed(2)), a.avg.toFixed(2)].join(',')));
+    const url = URL.createObjectURL(new Blob([lines.join('\n')], {type:'text/csv'}));
+    const el = document.createElement('a');
+    el.href = url; el.download = 'evaluation-averages.csv'; el.click();
+    setTimeout(() => URL.revokeObjectURL(url), 2000);
+  };
+
+  setSort(key) {
+    this.setState(s => ({ sort: s.sort.key === key ? { key, dir:-s.sort.dir } : { key, dir: key === 'name' ? 1 : -1 } }));
+  }
+
+  save(session) {
+    try { localStorage.setItem(SKEY, JSON.stringify(session)); } catch (e) {}
+    this.setState({ session, lockPin:'', lockName:'', lockError:'' });
+  }
+
+  submitLock = () => {
+    const X = this.state.extras, D = this.state.data;
+    if (!X || !D) return;
+    const pin = this.state.lockPin.trim();
+    if (this.state.lockRole === 'internal') {
+      if (pin === X.teamPin) return this.save({ role:'internal' });
+      return this.setState({ lockError: 'That team code is not valid.' });
+    }
+    const q = this.state.lockName.trim().toLowerCase();
+    if (!q) return this.setState({ lockError: 'Enter your name as it appears in the tracker.' });
+    const hits = D.agents.filter(a => a.n.toLowerCase().includes(q));
+    if (!hits.length) return this.setState({ lockError: 'No agent found with that name.' });
+    if (hits.length > 1 && !hits.some(a => a.n.toLowerCase() === q)) {
+      return this.setState({ lockError: hits.length + ' names match. Type your full name.' });
+    }
+    const me = hits.find(a => a.n.toLowerCase() === q) || hits[0];
+    if (this.ex(me.n).pin !== pin) return this.setState({ lockError: 'Wrong PIN for that name.' });
+    this.save({ role:'clerk', name:me.n });
+  };
+
+  renderVals() {
+    const D = this.state.data, X = this.state.extras;
+    const session = this.state.session;
+    const role = session ? session.role : null;
+    const stamp = new Date().toLocaleDateString('en-GB', { day:'2-digit', month:'short', year:'numeric' });
+    const isClerk = this.state.lockRole === 'clerk';
+
+    const base = {
+      stamp,
+      locked: !session,
+      isInternal: role === 'internal',
+      lockIsClerk: isClerk,
+      lockName: this.state.lockName,
+      lockPin: this.state.lockPin,
+      lockError: this.state.lockError,
+      pinLabel: isClerk ? 'Your personal PIN' : 'Team access code',
+      lockBlurb: isClerk
+        ? 'You will only see your own evaluations, your own scores and the feedback QA wrote for you. Nobody else appears in this view.'
+        : 'Full access to every agent, coaching notes, calibration flags and evaluator comparisons. For QA, Sups and FS only.',
+      lockHint: isClerk
+        ? 'Demo build: PINs are generated per agent and listed inside each agent panel on the internal side.'
+        : 'Demo build: team access code is ' + (X ? X.teamPin : '····') + '.',
+      lockTabs: [
+        { key:'internal', label:'QA · Sups · FS' },
+        { key:'clerk', label:"I'm an agent" }
+      ].map(t => ({ label:t.label,
+        bg: this.state.lockRole === t.key ? 'rgba(201,242,39,.12)' : 'transparent',
+        border: this.state.lockRole === t.key ? '#C9F227' : '#23272A',
+        fg: this.state.lockRole === t.key ? '#C9F227' : '#8C9490',
+        onClick: () => this.setState({ lockRole:t.key, lockError:'' }) })),
+      onLockName: e => this.setState({ lockName:e.target.value }),
+      onLockPin: e => this.setState({ lockPin:e.target.value }),
+      onLockKey: e => { if (e.key === 'Enter') this.submitLock(); },
+      submitLock: this.submitLock,
+      signOut: () => { try { localStorage.removeItem(SKEY); } catch (err) {} this.setState({ session:null, sel:null, lockPin:'', lockName:'' }); },
+      clerk: null, detail: null,
+      loading: false, showMatrix: false,
+      tabMatrix: false, tabCoaching: false, tabCalibration: false, tabEvaluators: false
+    };
+
+    if (!session) return base;
+    if (role === 'clerk') return { ...base, clerk: this.clerkView(session.name) };
+    return { ...base, ...this.internalView(), loading: !D };
+  }
+
+  clerkView(name) {
+    const D = this.state.data; if (!D) return null;
+    const raw = D.agents.find(a => a.n === name); if (!raw) return null;
+    const months = D.months;
+    const a = this.enrich(raw, months);
+    const E = this.ex(name);
+
+    const X0 = 42, X1 = 606, Y0 = 26, Y1 = 196, lo = 60, hi = 100;
+    const y = v => Y1 - ((v - lo)/(hi - lo)) * (Y1 - Y0);
+    const n = Math.max(months.length - 1, 1);
+    const x = i => X0 + (i/n) * (X1 - X0);
+    const points = [], path = [];
+    a.vals.forEach((v,i) => {
+      if (v == null) return;
+      const px = x(i), py = y(Math.max(lo, Math.min(hi, v)));
+      path.push(px.toFixed(1) + ',' + py.toFixed(1));
+      points.push({ x:px.toFixed(1), y:py.toFixed(1), txt:v.toFixed(1),
+        left:(px/620*100).toFixed(2)+'%', labelTop:((py-9)/240*100).toFixed(2)+'%',
+        month:months[i].slice(0,3), color:band(v).c });
+    });
+
+    const evs = E.evals.slice().reverse();
+    return {
+      name: a.n, team: (a.t||'').trim() || 'Unassigned',
+      avg: a.avg != null ? a.avg.toFixed(1) : '—',
+      avgColor: a.avg != null ? band(a.avg).c : '#E8EAE6',
+      deltaTxt: a.delta == null ? 'First recorded month' : (a.delta >= 0 ? '▲ ' : '▼ ') + Math.abs(a.delta).toFixed(1) + ' vs previous month',
+      deltaColor: a.delta == null ? '#5C6461' : (a.delta >= 0 ? '#C9F227' : '#F58585'),
+      grid: [100,90,80,70,60].map(v => ({ y:y(v).toFixed(1), top:(y(v)/240*100).toFixed(2)+'%', label:String(v) })),
+      points, path: path.join(' '),
+      months: months.filter((m,i) => a.vals[i] != null).map(m => ({
+        label:this.short(m), value:a.s[m].toFixed(1), color:band(a.s[m]).c })),
+      comments: evs.map(e => ({ date:e.date, score:e.score.toFixed(1), comment:e.comment, color:band(e.score).c })),
+      convos: evs.map(e => ({ id:e.id, link:this.link(e.id), date:e.date, score:e.score.toFixed(1), color:band(e.score).c })),
+      note: evs.length + ' conversations reviewed · links open in Intercom'
+    };
+  }
+
+  internalView() {
+    const D = this.state.data;
+    const { months, list } = this.visible();
+    const all = D ? D.agents.map(a => this.enrich(a, D.months)) : [];
+    const tab = this.state.tab;
+
+    const teamStats = {};
+    all.forEach(a => { const t = (a.t||'').trim(); (teamStats[t] = teamStats[t] || []).push(a); });
+
+    let idx = 0;
+    const rows = [];
+    if (this.state.group) {
+      const order = [];
+      list.forEach(a => { const t = (a.t||'').trim(); if (!order.includes(t)) order.push(t); });
+      order.forEach(t => {
+        const mem = list.filter(a => (a.t||'').trim() === t);
+        const tv = mem.filter(a => a.avg != null);
+        const tAvg = tv.length ? tv.reduce((s,a)=>s+a.avg,0)/tv.length : 0;
+        rows.push({ isGroup:true, isAgent:false, label:t || 'Unassigned',
+          dot:this.teamColor(t), meta: mem.length + ' agents · avg ' + tAvg.toFixed(1) });
+        mem.forEach(a => rows.push(this.agentRow(a, months, idx++)));
+      });
+    } else {
+      list.forEach(a => rows.push(this.agentRow(a, months, idx++)));
+    }
+
+    const shown = list.filter(a => a.avg != null);
+    const orgAvg = shown.length ? shown.reduce((s,a)=>s+a.avg,0)/shown.length : 0;
+    const cover = m => list.map(a=>a.s[m]).filter(x=>x!=null);
+    const mAvg = m => { const v = cover(m); return v.length ? v.reduce((x,y)=>x+y,0)/v.length : null; };
+    const peak = Math.max(1, ...months.map(m => cover(m).length));
+    const solid = months.filter(m => cover(m).length >= Math.max(10, peak * 0.1));
+    const dropped = months.filter(m => solid.indexOf(m) === -1);
+    const lastM = solid[solid.length-1] || months[months.length-1];
+    const prevM = solid[solid.length-2];
+    const lm = mAvg(lastM), pm = prevM ? mAvg(prevM) : null;
+    const mom = (lm != null && pm != null) ? lm - pm : null;
+    const partial = months[months.length-1] !== lastM ? months[months.length-1] : null;
+
+    const avgs = shown.map(a => a.avg);
+    const hLo = avgs.length ? Math.floor(Math.min(...avgs)) : 70;
+    const hHi = avgs.length ? Math.ceil(Math.max(...avgs)) : 100;
+    const nb = 14, step = Math.max((hHi - hLo)/nb, 0.1);
+    const buckets = new Array(nb).fill(0);
+    avgs.forEach(v => { const i = Math.min(nb-1, Math.floor((v - hLo)/step)); buckets[i]++; });
+    const bMax = Math.max(1, ...buckets);
+    const hist = buckets.map((c,i) => {
+      const mid = hLo + step*(i+0.5);
+      return { h: (8 + (c/bMax)*92).toFixed(1) + '%', color: c ? band(mid).c : '#1C1F21',
+        title: c + ' agents · ' + (hLo+step*i).toFixed(1) + '–' + (hLo+step*(i+1)).toFixed(1) };
+    });
+
+    const tvals = months.map(m => (solid.indexOf(m) === -1 ? null : mAvg(m)));
+    const present = tvals.filter(v => v != null);
+    const tLo = present.length ? Math.min(...present) - 1.5 : 80;
+    const tHi = present.length ? Math.max(...present) + 1.5 : 100;
+    const ty = v => 108 - ((v - tLo)/Math.max(tHi-tLo,1)) * 88;
+    const tx = i => 40 + (i/Math.max(months.length-1,1)) * 540;
+    const trendPts = [], tp = [];
+    tvals.forEach((v,i) => {
+      if (v == null) return;
+      tp.push(tx(i).toFixed(1) + ',' + ty(v).toFixed(1));
+      trendPts.push({ x:tx(i).toFixed(1), y:ty(v).toFixed(1), txt:v.toFixed(1),
+        left:(tx(i)/620*100).toFixed(2)+'%', top:(ty(v)/130*100).toFixed(2)+'%', month:months[i].slice(0,3) });
+    });
+    const trendArea = tp.length ? (tp[0].split(',')[0] + ',126 ' + tp.join(' ') + ' ' + tp[tp.length-1].split(',')[0] + ',126') : '';
+
+    // flags + evaluator stats over the visible selection
+    const flagRows = [], evalStats = {};
+    let allScores = [];
+    list.forEach(a => {
+      this.ex(a.n).evals.forEach(e => {
+        allScores.push(e.score);
+        const s = (evalStats[e.evaluator] = evalStats[e.evaluator] || { n:0, sum:0, mix:[0,0,0,0,0] });
+        s.n++; s.sum += e.score;
+        s.mix[BANDS.indexOf(band(e.score))]++;
+        if (e.flag) flagRows.push({ agent:a, e });
+      });
+    });
+    const globalAvg = allScores.length ? allScores.reduce((x,y)=>x+y,0)/allScores.length : 0;
+
+    const flags = flagRows.sort((p,q) => q.e.score - p.e.score ? p.e.score - q.e.score : 0).map(({agent, e}) => ({
+      name: agent.n, date: e.date, score: e.score.toFixed(1), scoreColor: band(e.score).c,
+      evaluator: e.evaluator, comment: e.comment, id: e.id, link: this.link(e.id),
+      flag: e.flag, flagColor: e.flag === 'disputed' ? '#FF6B6B' : '#F5A524',
+      onClick: () => this.setState({ sel: agent.n })
+    }));
+
+    const evaluators = Object.keys(evalStats).sort().map(k => {
+      const s = evalStats[k], avg = s.sum/s.n, d = avg - globalAvg;
+      const mix = s.mix.map((c,i) => ({ w: (c/s.n*100).toFixed(2)+'%', color: BANDS[i].c,
+        title: c + ' evaluations in ' + BANDS[i].label })).filter(m => m.w !== '0.00%');
+      const strict = d < -0.8, soft = d > 0.8;
+      return { name:k, count:String(s.n), avg:avg.toFixed(1), color:band(avg).c,
+        delta: (d >= 0 ? '+' : '−') + Math.abs(d).toFixed(1) + ' vs all',
+        deltaColor: Math.abs(d) < 0.8 ? '#5C6461' : (d > 0 ? '#F0B26B' : '#8FBDD6'),
+        mix, mixNote: s.mix[0] + ' / ' + s.mix[1] + ' / ' + s.mix[2] + ' / ' + s.mix[3] + ' / ' + s.mix[4] + ' by band',
+        note: strict ? 'Scores below the group average — worth a calibration check.'
+          : soft ? 'Scores above the group average — worth a calibration check.'
+          : 'Tracks close to the group average.' };
+    });
+
+    const coaching = list.slice(0, 60).map(a => {
+      const E = this.ex(a.n);
+      const last = E.evals[E.evals.length-1];
+      return {
+        name:a.n, team:(a.t||'').trim() || 'Unassigned', teamColor:this.teamColor(a.t), owner:E.owner,
+        avg: a.avg != null ? a.avg.toFixed(1) : '—', avgColor: a.avg != null ? band(a.avg).c : '#E8EAE6',
+        delta: a.delta == null ? '' : (a.delta >= 0 ? '+' : '−') + Math.abs(a.delta).toFixed(1) + ' MoM',
+        deltaColor: a.delta == null ? '#4A5254' : (a.delta >= 0 ? '#C9F227' : '#F58585'),
+        notes: E.notes,
+        hasActions: E.actions.length > 0,
+        actions: E.actions.map(x => ({ text:x.text, due:this.short(x.due),
+          mark: x.done ? '#C9F227' : '#4A5254', fill: x.done ? '#C9F227' : 'transparent',
+          color: x.done ? '#5C6461' : '#C4C9C4' })),
+        lastComment: last ? last.comment : 'No evaluation recorded yet.',
+        lastId: last ? last.id : '',
+        lastLink: last ? this.link(last.id) : '#',
+        lastMeta: last ? last.date + ' · ' + last.score.toFixed(1) + ' · ' + last.evaluator : '',
+        onClick: () => this.setState({ sel:a.n })
+      };
+    });
+
+    const teamChips = Object.keys(teamStats).sort().map(t => {
+      const on = this.state.teams.includes(t);
+      return { label:t || 'Unassigned', count:String(teamStats[t].length), dot:this.teamColor(t),
+        bg: on ? 'rgba(201,242,39,.12)' : 'transparent', border: on ? '#C9F227' : '#23272A', fg: on ? '#C9F227' : '#8C9490',
+        onClick: () => this.setState(s => ({ teams: s.teams.includes(t) ? s.teams.filter(x=>x!==t) : [...s.teams, t] })) };
+    });
+
+    const tabDefs = [
+      { key:'matrix', label:'Matrix', count:String(list.length) },
+      { key:'coaching', label:'Coaching', count:String(coaching.length) },
+      { key:'calibration', label:'Calibration', count:String(flags.length) },
+      { key:'evaluators', label:'Evaluators', count:String(evaluators.length) }
+    ];
+
+    return {
+      rows, hist, trendPts, teamChips, coaching, flags, evaluators,
+      noFlags: flags.length === 0,
+      tabs: tabDefs.map(t => ({ label:t.label, count:t.count,
+        fg: tab === t.key ? '#C9F227' : '#6B736F',
+        line: tab === t.key ? '#C9F227' : 'transparent',
+        onClick: () => this.setState({ tab:t.key }) })),
+      tabMatrix: tab === 'matrix', tabCoaching: tab === 'coaching',
+      tabCalibration: tab === 'calibration', tabEvaluators: tab === 'evaluators',
+      showMatrix: tab === 'matrix' && !!D,
+      empty: !!D && tab === 'matrix' && list.length === 0,
+      trendPath: tp.join(' '), trendArea,
+      trendGrid: [0,44,88].map(y => ({ y:(20+y).toFixed(1) })),
+      trendRange: solid.length ? this.short(solid[0]) + ' – ' + this.short(solid[solid.length-1])
+        + (dropped.length ? ' · ' + dropped.map(m => this.short(m)).join(', ') + ' too few scores' : '') : '',
+      histLo: hLo.toFixed(0), histHi: hHi.toFixed(0),
+      orgAvg: orgAvg.toFixed(1),
+      momTxt: mom == null ? '' : (mom >= 0 ? '▲ ' : '▼ ') + Math.abs(mom).toFixed(1) + ' vs ' + this.short(prevM),
+      momColor: mom == null ? '#5C6461' : (mom >= 0 ? '#C9F227' : '#F58585'),
+      heroNote: shown.length + ' agents with recorded scores of ' + all.length + ' tracked. '
+        + (lastM ? this.short(lastM) + ' closed at ' + (lm != null ? lm.toFixed(1) : '—') + ' across ' + cover(lastM).length + ' evaluations' : '')
+        + (partial ? '. ' + this.short(partial) + ' is still in progress.' : '.'),
+      monthCols: months.map(m => ({ label:this.short(m),
+        color: this.state.sort.key === m ? '#C9F227' : '#6B736F', onClick: () => this.setSort(m) })),
+      gridCols: '232px repeat(' + months.length + ', minmax(48px,1fr)) 128px 82px',
+      query: this.state.query,
+      onQuery: e => this.setState({ query:e.target.value }),
+      minMonths: this.state.minMonths,
+      maxMonths: Math.max(2, months.length),
+      onMinMonths: e => this.setState({ minMonths:+e.target.value }),
+      toggleGroup: () => this.setState(s => ({ group:!s.group })),
+      groupBg: this.state.group ? 'rgba(201,242,39,.12)' : 'transparent',
+      groupBorder: this.state.group ? '#C9F227' : '#23272A',
+      groupFg: this.state.group ? '#C9F227' : '#8C9490',
+      sortByAvg: () => this.setSort('avg'),
+      sortByName: () => this.setSort('name'),
+      avgHeadColor: this.state.sort.key === 'avg' ? '#C9F227' : '#6B736F',
+      nameHeadColor: this.state.sort.key === 'name' ? '#C9F227' : '#6B736F',
+      exportCsv: this.exportCsv,
+      legend: BANDS.slice().reverse().map(b => ({ bg:b.bg, bd:b.bd, label:b.label })),
+      footnote: list.length + ' agents shown · Feedback Tracker · notes and conversation IDs are sample data',
+      detail: this.detail(months, teamStats),
+      closeDetail: () => this.setState({ sel:null })
+    };
+  }
+
+  agentRow(a, months, order) {
+    const E = this.ex(a.n);
+    const cells = months.map((m,i) => {
+      const v = a.vals[i];
+      const delay = ((order % 18) * 18 + i * 26) + 'ms';
+      if (v == null) return { txt:'', bg:'transparent', bd:'transparent', fg:'#2A2F31', title:m + ': no evaluation', delay };
+      const b = band(v);
+      return { txt:v.toFixed(1), bg:b.bg, bd:b.bd, fg:b.c, title:m + ': ' + v.toFixed(2), delay };
+    });
+    const pts = [];
+    a.vals.forEach((v,i) => { if (v != null) pts.push([i, v]); });
+    const lo = Math.min(...a.nums, 60), hi = Math.max(...a.nums, 100);
+    const span = Math.max(hi - lo, 1);
+    const n = Math.max(months.length - 1, 1);
+    const spark = pts.length > 1
+      ? pts.map(([i,v]) => ((i/n)*100).toFixed(1) + ',' + (24 - ((v-lo)/span)*22).toFixed(1)).join(' ')
+      : (pts.length ? '0,13 100,13' : '');
+    const ab = a.avg != null ? band(a.avg) : BANDS[4];
+    const selected = this.state.sel === a.n;
+    return {
+      isGroup:false, isAgent:true,
+      name:a.n, team:(a.t||'').trim() || 'Unassigned', teamColor:this.teamColor(a.t),
+      hasFlag: E.evals.some(e => e.flag),
+      cells, spark, sparkColor:'#4A5254',
+      delta: a.delta == null ? '' : (a.delta >= 0 ? '+' : '−') + Math.abs(a.delta).toFixed(1),
+      deltaColor: a.delta == null ? '#2A2F31' : (a.delta >= 0 ? '#C9F227' : '#F58585'),
+      avg: a.avg != null ? a.avg.toFixed(1) : '—',
+      avgColor: ab.c,
+      rowBg: selected ? '#12161A' : 'transparent',
+      stickyBg: selected ? '#12161A' : '#08090A',
+      onClick: () => this.setState({ sel:a.n })
+    };
+  }
+
+  detail(months, teamStats) {
+    if (!this.state.sel || !this.state.data) return null;
+    const raw = this.state.data.agents.find(x => x.n === this.state.sel);
+    if (!raw) return null;
+    const a = this.enrich(raw, months);
+    const t = (a.t||'').trim();
+    const E = this.ex(a.n);
+    const mates = (teamStats[t] || []);
+    const teamAvgFor = m => { const v = mates.map(x=>x.s[m]).filter(y=>y!=null); return v.length ? v.reduce((x,y)=>x+y,0)/v.length : null; };
+
+    const X0 = 40, X1 = 508, Y0 = 24, Y1 = 176, lo = 60, hi = 100;
+    const y = v => Y1 - ((v - lo)/(hi - lo)) * (Y1 - Y0);
+    const n = Math.max(months.length - 1, 1);
+    const x = i => X0 + (i/n) * (X1 - X0);
+
+    const points = [], path = [];
+    a.vals.forEach((v,i) => {
+      if (v == null) return;
+      const px = x(i), py = y(Math.max(lo, Math.min(hi, v)));
+      path.push(px.toFixed(1) + ',' + py.toFixed(1));
+      points.push({ x:px.toFixed(1), y:py.toFixed(1), txt:v.toFixed(1),
+        left:(px/520*100).toFixed(2)+'%', labelTop:((py-8)/210*100).toFixed(2)+'%',
+        month:months[i].slice(0,3), color:band(v).c });
+    });
+    const teamPath = months.map((m,i) => { const v = teamAvgFor(m); return v == null ? null : x(i).toFixed(1) + ',' + y(Math.max(lo,Math.min(hi,v))).toFixed(1); }).filter(Boolean);
+
+    const best = Math.max(...a.nums), worst = Math.min(...a.nums);
+    const tAll = mates.filter(m => m.avg != null);
+    const tAvg = tAll.length ? tAll.reduce((s,m)=>s+m.avg,0)/tAll.length : 0;
+    const rank = tAll.slice().sort((p,q)=>q.avg-p.avg).findIndex(m => m.n === a.n) + 1;
+
+    return {
+      name:a.n, team:t || 'Unassigned', teamColor:this.teamColor(t), owner:E.owner, pin:E.pin,
+      stats: [
+        { label:'Average', value:a.avg.toFixed(1), color:band(a.avg).c },
+        { label:'Best / low', value:best.toFixed(0) + ' / ' + worst.toFixed(0), color:'#E8EAE6' },
+        { label:'Team rank', value: rank + ' of ' + tAll.length, color: a.avg >= tAvg ? '#C9F227' : '#F0B26B' }
+      ],
+      grid: [100,90,80,70,60].map(v => ({ y:y(v).toFixed(1), top:(y(v)/210*100).toFixed(2)+'%', label:String(v) })),
+      points, path:path.join(' '), teamPath:teamPath.join(' '),
+      evals: E.evals.slice().reverse().map(e => ({
+        score:e.score.toFixed(1), color:band(e.score).c, id:e.id, link:this.link(e.id),
+        date:e.date, comment:e.comment, evaluator:e.evaluator,
+        hasFlag: !!e.flag, flag: e.flag || '', flagColor: e.flag === 'disputed' ? '#FF6B6B' : '#F5A524'
+      }))
+    };
+  }
+}
+</script>
+</body>
+</html>
