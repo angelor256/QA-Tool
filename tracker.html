@@ -1,0 +1,454 @@
+<!DOCTYPE html>
+<html>
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<script src="./support.js"></script>
+</head>
+<body>
+<x-dc>
+<helmet>
+<link rel="preconnect" href="https://fonts.googleapis.com" />
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin="" />
+<link href="https://fonts.googleapis.com/css2?family=Newsreader:ital,opsz,wght@0,6..72,300;0,6..72,400;0,6..72,500;1,6..72,300&family=IBM+Plex+Mono:wght@400;500;600&family=IBM+Plex+Sans:wght@400;500;600&display=swap" rel="stylesheet" />
+<style>
+  html, body { margin:0; padding:0; background:#F2EFE8; }
+  * { box-sizing:border-box; }
+  a { color:#1B3A6B; text-decoration:none; border-bottom:1px solid rgba(27,58,107,.35); }
+  a:hover { color:#0F2445; border-bottom-color:#0F2445; }
+  ::-webkit-scrollbar { width:11px; height:11px; }
+  ::-webkit-scrollbar-thumb { background:#C9C3B6; }
+  ::-webkit-scrollbar-track { background:#E7E2D8; }
+  input[type=range] { accent-color:#1B3A6B; }
+  @keyframes qaSlide { from { opacity:0; transform:translateX(28px); } to { opacity:1; transform:none; } }
+</style>
+</helmet>
+
+<div style="min-height:100vh; background:#F2EFE8; color:#1A1813; font-family:'IBM Plex Sans', system-ui, sans-serif; -webkit-font-smoothing:antialiased; padding:0 0 80px;">
+
+  <div style="max-width:1560px; margin:0 auto; padding:0 40px;">
+
+    <div style="display:flex; align-items:baseline; justify-content:space-between; gap:40px; flex-wrap:wrap; padding:34px 0 0;">
+      <div style="font-family:'IBM Plex Mono',monospace; font-size:10.5px; letter-spacing:.18em; text-transform:uppercase; color:#6E6858;">Quality Assurance / Customer Service</div>
+      <div style="font-family:'IBM Plex Mono',monospace; font-size:10.5px; letter-spacing:.18em; text-transform:uppercase; color:#6E6858;">{{ stamp }}</div>
+    </div>
+
+    <div style="height:1px; background:#1A1813; margin-top:12px;"></div>
+
+    <div style="display:grid; grid-template-columns:minmax(0,1.45fr) minmax(0,1fr); gap:48px; align-items:end; padding:26px 0 24px; border-bottom:1px solid #D5CFC1;">
+      <div>
+        <h1 style="margin:0; font-family:'Newsreader',Georgia,serif; font-weight:300; font-size:60px; line-height:.96; letter-spacing:-.025em; color:#141209;">Evaluation<br />Averages</h1>
+      </div>
+      <div style="display:flex; flex-direction:column; gap:16px; padding-bottom:6px;">
+        <div style="font-size:13.5px; line-height:1.6; color:#4A4438; max-width:52ch; text-wrap:pretty;">Monthly evaluation average per agent, drawn from the Feedback Tracker. Agents appear once they have at least one recorded score; blank cells mean no evaluation was logged that month.</div>
+        <div style="display:flex; gap:10px;">
+          <button onClick="{{ exportCsv }}" style="font-family:'IBM Plex Mono',monospace; font-size:10.5px; letter-spacing:.14em; text-transform:uppercase; color:#F2EFE8; background:#1A1813; border:1px solid #1A1813; border-radius:0; padding:10px 16px; cursor:pointer;" style-hover="background:#3A342A; border-color:#3A342A;">Export CSV</button>
+          <button onClick="{{ toggleGroup }}" style="font-family:'IBM Plex Mono',monospace; font-size:10.5px; letter-spacing:.14em; text-transform:uppercase; color:{{ groupFg }}; background:{{ groupBg }}; border:1px solid {{ groupBorder }}; border-radius:0; padding:10px 16px; cursor:pointer;" style-hover="border-color:#1A1813;">Group by team</button>
+        </div>
+      </div>
+    </div>
+
+    <div style="display:grid; grid-template-columns:repeat(auto-fit,minmax(200px,1fr)); border-bottom:1px solid #D5CFC1;">
+      <sc-for list="{{ kpis }}" as="k" hint-placeholder-count="4">
+        <div style="padding:22px 26px 22px 0; border-right:1px solid #D5CFC1; display:flex; flex-direction:column; gap:9px;">
+          <div style="font-family:'IBM Plex Mono',monospace; font-size:9.5px; letter-spacing:.2em; text-transform:uppercase; color:#807961;">{{ k.label }}</div>
+          <div style="font-family:'Newsreader',Georgia,serif; font-weight:400; font-size:44px; line-height:1; letter-spacing:-.02em; color:{{ k.color }}; font-variant-numeric:tabular-nums;">{{ k.value }}</div>
+          <div style="font-size:11.5px; line-height:1.45; color:#6E6858; text-wrap:pretty;">{{ k.sub }}</div>
+        </div>
+      </sc-for>
+    </div>
+
+    <div style="display:flex; flex-wrap:wrap; align-items:center; gap:18px; padding:16px 0; border-bottom:1px solid #D5CFC1;">
+      <input type="text" placeholder="Search agent" value="{{ query }}" onInput="{{ onQuery }}" style="font-family:'IBM Plex Sans',sans-serif; font-size:13px; color:#1A1813; background:transparent; border:0; border-bottom:1px solid #B9B2A1; border-radius:0; padding:6px 2px; width:190px; outline:none;" style-focus="border-bottom-color:#1B3A6B;" />
+
+      <div style="display:flex; flex-wrap:wrap; gap:5px; flex:1; min-width:280px;">
+        <sc-for list="{{ teamChips }}" as="c" hint-placeholder-count="8">
+          <button onClick="{{ c.onClick }}" style="font-family:'IBM Plex Mono',monospace; font-size:10px; letter-spacing:.1em; text-transform:uppercase; cursor:pointer; padding:6px 9px; border-radius:0; border:1px solid {{ c.border }}; background:{{ c.bg }}; color:{{ c.fg }}; display:flex; align-items:center; gap:7px;" style-hover="border-color:#1A1813;">
+            <span style="width:7px; height:7px; background:{{ c.dot }};"></span>{{ c.label }}<span style="opacity:.5;">{{ c.count }}</span>
+          </button>
+        </sc-for>
+      </div>
+
+      <div style="display:flex; align-items:center; gap:10px;">
+        <span style="font-family:'IBM Plex Mono',monospace; font-size:9.5px; letter-spacing:.2em; text-transform:uppercase; color:#807961;">Min. months</span>
+        <input type="range" min="1" max="{{ maxMonths }}" step="1" value="{{ minMonths }}" onInput="{{ onMinMonths }}" style="width:96px;" />
+        <span style="font-family:'IBM Plex Mono',monospace; font-size:12px; color:#1A1813; width:14px;">{{ minMonths }}</span>
+      </div>
+    </div>
+
+    <sc-if value="{{ loading }}" hint-placeholder-val="{{ true }}">
+      <div style="padding:110px 0; text-align:center; font-family:'IBM Plex Mono',monospace; font-size:11px; letter-spacing:.2em; text-transform:uppercase; color:#8B846F;">Loading evaluation data</div>
+    </sc-if>
+
+    <sc-if value="{{ ready }}">
+      <div style="overflow-x:auto; margin-top:0;">
+        <div style="min-width:1120px;">
+
+          <div style="display:grid; grid-template-columns:{{ gridCols }}; align-items:end; border-bottom:1px solid #1A1813; background:#F2EFE8; position:sticky; top:0; z-index:3;">
+            <div onClick="{{ sortByName }}" style="padding:16px 16px 9px 0; font-family:'IBM Plex Mono',monospace; font-size:9.5px; letter-spacing:.2em; text-transform:uppercase; color:{{ nameHeadColor }}; cursor:pointer; position:sticky; left:0; background:#F2EFE8;" style-hover="color:#1B3A6B;">Agent</div>
+            <sc-for list="{{ monthCols }}" as="m" hint-placeholder-count="9">
+              <div onClick="{{ m.onClick }}" style="padding:16px 4px 9px; text-align:center; font-family:'IBM Plex Mono',monospace; font-size:9.5px; letter-spacing:.12em; text-transform:uppercase; color:{{ m.color }}; cursor:pointer;" style-hover="color:#1B3A6B;">{{ m.label }}</div>
+            </sc-for>
+            <div style="padding:16px 8px 9px; text-align:center; font-family:'IBM Plex Mono',monospace; font-size:9.5px; letter-spacing:.2em; text-transform:uppercase; color:#807961;">Trend</div>
+            <div onClick="{{ sortByAvg }}" style="padding:16px 0 9px 8px; text-align:right; font-family:'IBM Plex Mono',monospace; font-size:9.5px; letter-spacing:.2em; text-transform:uppercase; color:{{ avgHeadColor }}; cursor:pointer;" style-hover="color:#1B3A6B;">Avg</div>
+          </div>
+
+          <sc-for list="{{ rows }}" as="r" hint-placeholder-count="16">
+            <div>
+              <sc-if value="{{ r.isGroup }}">
+                <div style="display:flex; align-items:baseline; gap:12px; padding:22px 0 7px; border-bottom:1px solid #D5CFC1;">
+                  <span style="width:8px; height:8px; background:{{ r.dot }};"></span>
+                  <span style="font-family:'IBM Plex Mono',monospace; font-size:10.5px; letter-spacing:.2em; text-transform:uppercase; color:#1A1813;">{{ r.label }}</span>
+                  <span style="flex:1;"></span>
+                  <span style="font-family:'IBM Plex Mono',monospace; font-size:10.5px; letter-spacing:.06em; color:#807961;">{{ r.meta }}</span>
+                </div>
+              </sc-if>
+              <sc-if value="{{ r.isAgent }}">
+                <div onClick="{{ r.onClick }}" style="display:grid; grid-template-columns:{{ gridCols }}; align-items:stretch; border-bottom:1px solid #E2DDD1; cursor:pointer; background:{{ r.rowBg }};" style-hover="background:#EAE5D9;">
+                  <div style="display:flex; align-items:center; gap:11px; padding:0 16px 0 0; min-width:0; position:sticky; left:0; background:{{ r.stickyBg }};">
+                    <div style="width:3px; align-self:stretch; background:{{ r.teamColor }};"></div>
+                    <div style="min-width:0; padding:9px 0;">
+                      <div style="font-size:13.5px; line-height:1.25; color:#1A1813; white-space:nowrap; overflow:hidden; text-overflow:ellipsis;">{{ r.name }}</div>
+                      <div style="font-family:'IBM Plex Mono',monospace; font-size:9.5px; letter-spacing:.1em; text-transform:uppercase; color:#8B846F; white-space:nowrap;">{{ r.team }}</div>
+                    </div>
+                  </div>
+                  <sc-for list="{{ r.cells }}" as="c" hint-placeholder-count="9">
+                    <div title="{{ c.title }}" style="display:flex; align-items:center; justify-content:center; font-family:'IBM Plex Mono',monospace; font-size:12px; font-weight:500; font-variant-numeric:tabular-nums; background:{{ c.bg }}; color:{{ c.fg }}; border-left:1px solid #F2EFE8; border-right:1px solid #F2EFE8;">{{ c.txt }}</div>
+                  </sc-for>
+                  <div style="display:flex; align-items:center; justify-content:flex-end; gap:9px; padding:0 8px;">
+                    <svg viewBox="0 0 100 26" preserveAspectRatio="none" style="width:66px; height:20px; overflow:visible;">
+                      <polyline points="{{ r.spark }}" fill="none" stroke="{{ r.sparkColor }}" stroke-width="1.4" stroke-linejoin="round" stroke-linecap="round" vector-effect="non-scaling-stroke"></polyline>
+                    </svg>
+                    <span style="font-family:'IBM Plex Mono',monospace; font-size:10.5px; font-variant-numeric:tabular-nums; color:{{ r.deltaColor }}; width:40px; text-align:right;">{{ r.delta }}</span>
+                  </div>
+                  <div style="display:flex; align-items:center; justify-content:flex-end; padding:0 0 0 8px; font-family:'IBM Plex Mono',monospace; font-size:15px; font-weight:500; font-variant-numeric:tabular-nums; color:{{ r.avgColor }};">{{ r.avg }}</div>
+                </div>
+              </sc-if>
+            </div>
+          </sc-for>
+
+          <sc-if value="{{ empty }}">
+            <div style="padding:70px 0; text-align:center; font-family:'IBM Plex Mono',monospace; font-size:11px; letter-spacing:.18em; text-transform:uppercase; color:#8B846F;">No agents match these filters</div>
+          </sc-if>
+
+        </div>
+      </div>
+
+      <div style="display:flex; align-items:center; gap:22px; margin-top:20px; flex-wrap:wrap; padding-top:14px; border-top:1px solid #1A1813;">
+        <span style="font-family:'IBM Plex Mono',monospace; font-size:9.5px; letter-spacing:.2em; text-transform:uppercase; color:#807961;">Score scale</span>
+        <div style="display:flex;">
+          <sc-for list="{{ legend }}" as="l" hint-placeholder-count="5">
+            <div style="display:flex; flex-direction:column; gap:5px; width:74px;">
+              <span style="height:9px; background:{{ l.bg }};"></span>
+              <span style="font-family:'IBM Plex Mono',monospace; font-size:9.5px; letter-spacing:.06em; color:#6E6858;">{{ l.label }}</span>
+            </div>
+          </sc-for>
+        </div>
+        <span style="flex:1;"></span>
+        <span style="font-family:'IBM Plex Mono',monospace; font-size:10px; letter-spacing:.08em; color:#8B846F;">{{ footnote }}</span>
+      </div>
+    </sc-if>
+
+  </div>
+
+  <sc-if value="{{ detail }}">
+    <div onClick="{{ closeDetail }}" style="position:fixed; inset:0; background:rgba(26,24,19,.34); z-index:40;"></div>
+    <div style="position:fixed; top:0; right:0; bottom:0; width:min(600px,94vw); background:#F7F4ED; border-left:1px solid #1A1813; z-index:41; overflow-y:auto; padding:32px 36px 48px; animation:qaSlide .26s cubic-bezier(.2,.8,.2,1);">
+      <div style="display:flex; align-items:flex-start; justify-content:space-between; gap:18px; border-bottom:1px solid #1A1813; padding-bottom:16px;">
+        <div style="display:flex; gap:14px; align-items:flex-start;">
+          <div style="width:4px; align-self:stretch; background:{{ detail.teamColor }};"></div>
+          <div>
+            <div style="font-family:'Newsreader',Georgia,serif; font-weight:400; font-size:32px; line-height:1.05; letter-spacing:-.02em;">{{ detail.name }}</div>
+            <div style="font-family:'IBM Plex Mono',monospace; font-size:10px; letter-spacing:.2em; text-transform:uppercase; color:#807961; margin-top:6px;">{{ detail.team }}</div>
+          </div>
+        </div>
+        <button onClick="{{ closeDetail }}" style="font-family:'IBM Plex Mono',monospace; font-size:10px; letter-spacing:.14em; text-transform:uppercase; color:#4A4438; background:transparent; border:1px solid #B9B2A1; border-radius:0; padding:7px 11px; cursor:pointer;" style-hover="border-color:#1A1813; color:#1A1813;">Close</button>
+      </div>
+
+      <div style="display:grid; grid-template-columns:repeat(3,1fr); border-bottom:1px solid #D5CFC1;">
+        <sc-for list="{{ detail.stats }}" as="s" hint-placeholder-count="3">
+          <div style="padding:18px 16px 18px 0; border-right:1px solid #D5CFC1;">
+            <div style="font-family:'IBM Plex Mono',monospace; font-size:9.5px; letter-spacing:.2em; text-transform:uppercase; color:#807961;">{{ s.label }}</div>
+            <div style="font-family:'Newsreader',Georgia,serif; font-size:30px; font-weight:400; margin-top:7px; letter-spacing:-.02em; color:{{ s.color }};">{{ s.value }}</div>
+          </div>
+        </sc-for>
+      </div>
+
+      <div style="margin-top:26px;">
+        <div style="font-family:'IBM Plex Mono',monospace; font-size:9.5px; letter-spacing:.2em; text-transform:uppercase; color:#807961;">Month by month</div>
+        <div style="position:relative; margin-top:16px; aspect-ratio:520/210;">
+          <svg viewBox="0 0 520 210" preserveAspectRatio="none" style="position:absolute; inset:0; width:100%; height:100%;">
+            <sc-for list="{{ detail.grid }}" as="g" hint-placeholder-count="5">
+              <line x1="34" y1="{{ g.y }}" x2="512" y2="{{ g.y }}" stroke="#DBD5C7" stroke-width="1" vector-effect="non-scaling-stroke"></line>
+            </sc-for>
+            <polyline points="{{ detail.teamPath }}" fill="none" stroke="#B0A894" stroke-width="1.2" stroke-dasharray="3 3" vector-effect="non-scaling-stroke"></polyline>
+            <polyline points="{{ detail.path }}" fill="none" stroke="#1A1813" stroke-width="1.6" stroke-linejoin="round" stroke-linecap="round" vector-effect="non-scaling-stroke"></polyline>
+            <sc-for list="{{ detail.points }}" as="p" hint-placeholder-count="6">
+              <circle cx="{{ p.x }}" cy="{{ p.y }}" r="3.4" fill="{{ p.color }}" stroke="#F7F4ED" stroke-width="1.6" vector-effect="non-scaling-stroke"></circle>
+            </sc-for>
+          </svg>
+          <sc-for list="{{ detail.grid }}" as="g" hint-placeholder-count="5">
+            <div style="position:absolute; left:0; top:{{ g.top }}; width:26px; transform:translateY(-50%); text-align:right; font-family:'IBM Plex Mono',monospace; font-size:9px; color:#8B846F;">{{ g.label }}</div>
+          </sc-for>
+          <sc-for list="{{ detail.points }}" as="p" hint-placeholder-count="6">
+            <div style="position:absolute; left:{{ p.left }}; top:{{ p.labelTop }}; transform:translate(-50%,-100%); font-family:'IBM Plex Mono',monospace; font-size:10px; white-space:nowrap; color:#1A1813;">{{ p.txt }}</div>
+          </sc-for>
+          <sc-for list="{{ detail.points }}" as="p" hint-placeholder-count="6">
+            <div style="position:absolute; left:{{ p.left }}; bottom:0; transform:translateX(-50%); font-family:'IBM Plex Mono',monospace; font-size:9px; letter-spacing:.06em; white-space:nowrap; color:#8B846F;">{{ p.month }}</div>
+          </sc-for>
+        </div>
+        <div style="display:flex; gap:20px; margin-top:12px; font-family:'IBM Plex Mono',monospace; font-size:10px; letter-spacing:.06em; color:#6E6858;">
+          <span style="display:flex; align-items:center; gap:7px;"><span style="width:16px; height:2px; background:#1A1813;"></span>{{ detail.name }}</span>
+          <span style="display:flex; align-items:center; gap:7px;"><span style="width:16px; height:1px; background:#B0A894;"></span>{{ detail.team }} avg</span>
+        </div>
+      </div>
+    </div>
+  </sc-if>
+
+</div>
+</x-dc>
+<script type="text/x-dc" data-dc-script data-props="{&quot;$preview&quot;:{&quot;width&quot;:1560,&quot;height&quot;:980},&quot;heatmap&quot;:{&quot;editor&quot;:&quot;boolean&quot;,&quot;default&quot;:true,&quot;tsType&quot;:&quot;boolean&quot;,&quot;section&quot;:&quot;Table&quot;},&quot;density&quot;:{&quot;editor&quot;:&quot;enum&quot;,&quot;options&quot;:[&quot;comfortable&quot;,&quot;compact&quot;],&quot;default&quot;:&quot;comfortable&quot;,&quot;tsType&quot;:&quot;string&quot;,&quot;section&quot;:&quot;Table&quot;},&quot;groupByTeam&quot;:{&quot;editor&quot;:&quot;boolean&quot;,&quot;default&quot;:true,&quot;tsType&quot;:&quot;boolean&quot;,&quot;section&quot;:&quot;Table&quot;}}">
+const TEAM_COLORS = {
+  'T1':'#1B3A6B','T2':'#2F6F63','T3':'#7A5C1E','Seniors ':'#8A3324','Seniors':'#8A3324',
+  'VIP ':'#6B3A6B','VIP':'#6B3A6B','3rd Party Squad':'#2A6B7C','Processing Specialist':'#4F6B22',
+  'Night Shift':'#3B3F73','Sups / FS':'#9A5B1E','Deposits':'#1F6B5B','Payouts':'#7C3A5B','New Hire':'#7A7466'
+};
+const BANDS = [
+  {min:97, c:'#1E5540', bg:'#CFE0D2', label:'97 +'},
+  {min:93, c:'#4A6B24', bg:'#E0E6CE', label:'93 – 97'},
+  {min:88, c:'#7A5A12', bg:'#F0E5C6', label:'88 – 93'},
+  {min:80, c:'#94501C', bg:'#F2DCC6', label:'80 – 88'},
+  {min:-1, c:'#8E2B24', bg:'#EFD1CC', label:'< 80'}
+];
+const band = v => BANDS.find(b => v >= b.min);
+
+class Component extends DCLogic {
+  state = { data:null, query:'', teams:[], minMonths:1, group:true, sort:{key:'avg', dir:-1}, sel:null };
+
+  componentDidMount() {
+    if (this.props.groupByTeam === false) this.setState({ group:false });
+    fetch('./tracker-data.json').then(r => r.json()).then(d => {
+      const months = d.months.filter(m => d.agents.some(a => a.s[m] != null));
+      this.setState({ data:{ months, agents:d.agents.filter(a => months.some(m => a.s[m] != null)) } });
+    }).catch(() => this.setState({ data:{ months:[], agents:[] } }));
+  }
+
+  short(m) { return m.replace(/ 20/, " '"); }
+  teamColor(t) { return TEAM_COLORS[(t||'').trim()] || TEAM_COLORS[t] || '#7A7466'; }
+
+  enrich(a, months) {
+    const vals = months.map(m => (a.s[m] == null ? null : a.s[m]));
+    const nums = vals.filter(v => v != null);
+    const avg = nums.length ? nums.reduce((x,y)=>x+y,0)/nums.length : null;
+    const last = nums[nums.length-1], prev = nums[nums.length-2];
+    return { ...a, vals, nums, avg, count:nums.length, latest:last ?? null,
+      delta: (last != null && prev != null) ? last - prev : null };
+  }
+
+  visible() {
+    const D = this.state.data; if (!D) return { months:[], list:[] };
+    const months = D.months;
+    const q = this.state.query.trim().toLowerCase();
+    let list = D.agents.map(a => this.enrich(a, months))
+      .filter(a => a.count >= this.state.minMonths)
+      .filter(a => !q || a.n.toLowerCase().includes(q))
+      .filter(a => !this.state.teams.length || this.state.teams.includes((a.t||'').trim()));
+    const { key, dir } = this.state.sort;
+    list.sort((x,y) => {
+      if (key === 'name') return dir * x.n.localeCompare(y.n);
+      const gx = key === 'avg' ? x.avg : x.s[key], gy = key === 'avg' ? y.avg : y.s[key];
+      if (gx == null && gy == null) return 0;
+      if (gx == null) return 1;
+      if (gy == null) return -1;
+      return dir * (gx - gy);
+    });
+    return { months, list };
+  }
+
+  exportCsv = () => {
+    const { months, list } = this.visible();
+    const esc = s => '"' + String(s).replace(/"/g,'""') + '"';
+    const lines = [['Team','Agent', ...months, 'Average'].map(esc).join(',')];
+    list.forEach(a => lines.push([esc(a.t), esc(a.n), ...a.vals.map(v => v == null ? '' : v.toFixed(2)), a.avg.toFixed(2)].join(',')));
+    const url = URL.createObjectURL(new Blob([lines.join('\n')], {type:'text/csv'}));
+    const el = document.createElement('a');
+    el.href = url; el.download = 'evaluation-averages.csv'; el.click();
+    setTimeout(() => URL.revokeObjectURL(url), 2000);
+  };
+
+  setSort(key) {
+    this.setState(s => ({ sort: s.sort.key === key ? { key, dir:-s.sort.dir } : { key, dir: key === 'name' ? 1 : -1 } }));
+  }
+
+  renderVals() {
+    const D = this.state.data;
+    const { months, list } = this.visible();
+    const all = D ? D.agents.map(a => this.enrich(a, D.months)) : [];
+    const heat = this.props.heatmap !== false;
+    const dense = this.props.density === 'compact';
+
+    const teamStats = {};
+    all.forEach(a => {
+      const t = (a.t||'').trim();
+      (teamStats[t] = teamStats[t] || []).push(a);
+    });
+
+    const rows = [];
+    if (this.state.group) {
+      const order = [];
+      list.forEach(a => { const t = (a.t||'').trim(); if (!order.includes(t)) order.push(t); });
+      order.forEach(t => {
+        const mem = list.filter(a => (a.t||'').trim() === t);
+        const tv = mem.filter(a => a.avg != null);
+        const tAvg = tv.length ? tv.reduce((s,a)=>s+a.avg,0)/tv.length : 0;
+        rows.push({ isGroup:true, isAgent:false, label:t || 'Unassigned',
+          dot:this.teamColor(t), meta: mem.length + ' agents / avg ' + tAvg.toFixed(1) });
+        mem.forEach(a => rows.push(this.agentRow(a, months, heat, dense)));
+      });
+    } else {
+      list.forEach(a => rows.push(this.agentRow(a, months, heat, dense)));
+    }
+
+    const shown = list.filter(a => a.avg != null);
+    const orgAvg = shown.length ? shown.reduce((s,a)=>s+a.avg,0)/shown.length : 0;
+    const top = shown.slice().sort((a,b)=>b.avg-a.avg)[0];
+    const cover = m => list.map(a=>a.s[m]).filter(x=>x!=null);
+    const mAvg = m => { const v = cover(m); return v.length ? v.reduce((x,y)=>x+y,0)/v.length : null; };
+    const peak = Math.max(1, ...months.map(m => cover(m).length));
+    const solid = months.filter(m => cover(m).length >= Math.max(5, peak * 0.4));
+    const lastM = solid[solid.length-1] || months[months.length-1];
+    const prevM = solid[solid.length-2];
+    const lm = mAvg(lastM), pm = prevM ? mAvg(prevM) : null;
+    const mom = (lm != null && pm != null) ? lm - pm : null;
+    const partial = months[months.length-1] !== lastM ? months[months.length-1] : null;
+
+    const kpis = [
+      { label:'Agents with scores', value:String(shown.length), sub:'of ' + all.length + ' tracked in the sheet', color:'#141209' },
+      { label:'Overall average', value:orgAvg.toFixed(1), sub:months.length + ' months of recorded data', color: orgAvg ? band(orgAvg).c : '#141209' },
+      { label:'Highest average', value: top ? top.avg.toFixed(1) : '—', sub: top ? top.n : '—', color:'#1E5540' },
+      { label: this.short(lastM || 'Latest month'), value: lm != null ? lm.toFixed(1) : '—',
+        sub: cover(lastM).length + ' agents scored'
+          + (mom == null ? '' : ' / ' + (mom >= 0 ? '+' : '−') + Math.abs(mom).toFixed(1) + ' vs ' + this.short(prevM))
+          + (partial ? ' / ' + this.short(partial) + ' still in progress' : ''),
+        color: mom == null ? '#141209' : (mom >= 0 ? '#1E5540' : '#8E2B24') }
+    ];
+
+    const teamChips = Object.keys(teamStats).sort().map(t => {
+      const on = this.state.teams.includes(t);
+      return { label:t || 'Unassigned', count:String(teamStats[t].length), dot:this.teamColor(t),
+        bg: on ? '#1A1813' : 'transparent', border: on ? '#1A1813' : '#CFC8B8', fg: on ? '#F2EFE8' : '#4A4438',
+        onClick: () => this.setState(s => ({ teams: s.teams.includes(t) ? s.teams.filter(x=>x!==t) : [...s.teams, t] })) };
+    });
+
+    const monthCols = months.map(m => ({ label:this.short(m),
+      color: this.state.sort.key === m ? '#1B3A6B' : '#807961',
+      onClick: () => this.setSort(m) }));
+
+    const now = new Date();
+    const stamp = now.toLocaleDateString('en-GB', { day:'2-digit', month:'short', year:'numeric' });
+
+    return {
+      loading: !D,
+      ready: !!D,
+      empty: !!D && list.length === 0,
+      rows, kpis, teamChips, monthCols, stamp,
+      gridCols: '236px repeat(' + months.length + ', minmax(48px,1fr)) 130px 84px',
+      query: this.state.query,
+      onQuery: e => this.setState({ query:e.target.value }),
+      minMonths: this.state.minMonths,
+      maxMonths: Math.max(2, months.length),
+      onMinMonths: e => this.setState({ minMonths:+e.target.value }),
+      toggleGroup: () => this.setState(s => ({ group:!s.group })),
+      groupBg: this.state.group ? '#1A1813' : 'transparent',
+      groupBorder: this.state.group ? '#1A1813' : '#CFC8B8',
+      groupFg: this.state.group ? '#F2EFE8' : '#4A4438',
+      sortByAvg: () => this.setSort('avg'),
+      sortByName: () => this.setSort('name'),
+      avgHeadColor: this.state.sort.key === 'avg' ? '#1B3A6B' : '#807961',
+      nameHeadColor: this.state.sort.key === 'name' ? '#1B3A6B' : '#807961',
+      exportCsv: this.exportCsv,
+      legend: BANDS.slice().reverse().map(b => ({ bg:b.bg, label:b.label })),
+      footnote: list.length + ' agents shown / ' + (months[0] ? this.short(months[0]) : '') + ' – ' + (months[months.length-1] ? this.short(months[months.length-1]) : ''),
+      detail: this.detail(months, teamStats),
+      closeDetail: () => this.setState({ sel:null })
+    };
+  }
+
+  agentRow(a, months, heat, dense) {
+    const cells = months.map((m,i) => {
+      const v = a.vals[i];
+      if (v == null) return { txt:'', bg:'transparent', fg:'#C4BDAB', title:m + ': no evaluation' };
+      const b = band(v);
+      return { txt:v.toFixed(1), bg: heat ? b.bg : 'transparent', fg:b.c, title:m + ': ' + v.toFixed(2) };
+    });
+    const pts = [];
+    a.vals.forEach((v,i) => { if (v != null) pts.push([i, v]); });
+    const lo = Math.min(...a.nums, 60), hi = Math.max(...a.nums, 100);
+    const span = Math.max(hi - lo, 1);
+    const n = Math.max(months.length - 1, 1);
+    const spark = pts.length > 1
+      ? pts.map(([i,v]) => ((i/n)*100).toFixed(1) + ',' + (24 - ((v-lo)/span)*22).toFixed(1)).join(' ')
+      : (pts.length ? '0,13 100,13' : '');
+    const ab = a.avg != null ? band(a.avg) : BANDS[4];
+    const selected = this.state.sel === a.n;
+    return {
+      isGroup:false, isAgent:true,
+      name:a.n, team:(a.t||'').trim() || 'Unassigned',
+      teamColor:this.teamColor(a.t),
+      cells, spark, sparkColor: '#5C5647',
+      delta: a.delta == null ? '' : (a.delta >= 0 ? '+' : '−') + Math.abs(a.delta).toFixed(1),
+      deltaColor: a.delta == null ? '#C4BDAB' : (a.delta >= 0 ? '#1E5540' : '#8E2B24'),
+      avg: a.avg != null ? a.avg.toFixed(1) : '—',
+      avgColor: ab.c,
+      rowBg: selected ? '#E7E1D2' : 'transparent',
+      stickyBg: selected ? '#E7E1D2' : '#F2EFE8',
+      onClick: () => this.setState({ sel:a.n })
+    };
+  }
+
+  detail(months, teamStats) {
+    if (!this.state.sel || !this.state.data) return null;
+    const raw = this.state.data.agents.find(x => x.n === this.state.sel);
+    if (!raw) return null;
+    const a = this.enrich(raw, months);
+    const t = (a.t||'').trim();
+    const mates = (teamStats[t] || []);
+    const teamAvgFor = m => { const v = mates.map(x=>x.s[m]).filter(y=>y!=null); return v.length ? v.reduce((x,y)=>x+y,0)/v.length : null; };
+
+    const X0 = 40, X1 = 508, Y0 = 24, Y1 = 176;
+    const lo = 60, hi = 100;
+    const y = v => Y1 - ((v - lo) / (hi - lo)) * (Y1 - Y0);
+    const n = Math.max(months.length - 1, 1);
+    const x = i => X0 + (i / n) * (X1 - X0);
+
+    const points = [], path = [];
+    a.vals.forEach((v,i) => {
+      if (v == null) return;
+      const px = x(i), py = y(Math.max(lo, Math.min(hi, v)));
+      path.push(px.toFixed(1) + ',' + py.toFixed(1));
+      points.push({ x:px.toFixed(1), y:py.toFixed(1), txt:v.toFixed(1),
+        left:(px/520*100).toFixed(2)+'%', labelTop:((py-8)/210*100).toFixed(2)+'%',
+        month:this.short(months[i]), color:band(v).c });
+    });
+    const teamPath = months.map((m,i) => { const v = teamAvgFor(m); return v == null ? null : x(i).toFixed(1) + ',' + y(Math.max(lo,Math.min(hi,v))).toFixed(1); }).filter(Boolean);
+
+    const best = Math.max(...a.nums), worst = Math.min(...a.nums);
+    const tAll = mates.filter(m => m.avg != null);
+    const tAvg = tAll.length ? tAll.reduce((s,m)=>s+m.avg,0)/tAll.length : 0;
+    const rank = tAll.slice().sort((p,q)=>q.avg-p.avg).findIndex(m => m.n === a.n) + 1;
+
+    return {
+      name:a.n, team:t || 'Unassigned', teamColor:this.teamColor(t),
+      stats: [
+        { label:'Average', value:a.avg.toFixed(1), color:band(a.avg).c },
+        { label:'Best / low', value:best.toFixed(0) + ' / ' + worst.toFixed(0), color:'#141209' },
+        { label:'Team rank', value: rank + ' of ' + tAll.length, color: a.avg >= tAvg ? '#1E5540' : '#94501C' }
+      ],
+      grid: [100,90,80,70,60].map(v => ({ y:y(v).toFixed(1), top:(y(v)/210*100).toFixed(2)+'%', label:String(v) })),
+      points, path:path.join(' '), teamPath:teamPath.join(' ')
+    };
+  }
+}
+</script>
+</body>
+</html>
